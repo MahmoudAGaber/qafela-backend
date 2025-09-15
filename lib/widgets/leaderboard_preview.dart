@@ -28,19 +28,19 @@ class LeaderboardPreview extends StatelessWidget {
   Widget getRankIcon(int rank) {
     switch (rank) {
       case 1:
-        return  Icon(CupertinoIcons.app_fill,
-            color: Colors.amber, size: 20);
+        return const Icon(Icons.emoji_events,
+            color: Colors.amber, size: 22);
       case 2:
-        return const Icon(CupertinoIcons.star_circle_fill,
-            color: Colors.grey, size: 20);
+        return const Icon(Icons.emoji_events,
+            color: Colors.brown, size: 20);
       case 3:
-        return const Icon(CupertinoIcons.star_circle_fill,
-            color: Colors.orange, size: 20);
+        return const Icon(Icons.emoji_events,
+            color: Colors.deepOrange, size: 20);
       default:
         return Text(
           "#$rank",
           style: const TextStyle(
-              fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+              fontSize: 12, fontWeight: FontWeight.bold, color: Colors.brown),
         );
     }
   }
@@ -51,38 +51,35 @@ class LeaderboardPreview extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF3A3D98), Color(0xFF6F86D6)],
+          colors: [Color(0xFFFFF8E1), Color(0xFFFFECB3)], // بيج رملي
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.brown.withOpacity(0.15),
             blurRadius: 6,
             offset: const Offset(0, 3),
           )
         ],
+        border: Border.all(color: Colors.orange.shade200),
       ),
       child: Column(
         children: [
           // العنوان
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: const [
-              Row(
-                children: [
-                  Icon(CupertinoIcons.alt,
-                      color: Colors.amber, size: 22),
-                  SizedBox(width: 6),
-                  Text(
-                    "المتصدرون",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                ],
+              Icon(Icons.leaderboard,
+                  color: Colors.deepOrange, size: 22),
+              SizedBox(width: 6),
+              Text(
+                "المتصدرون",
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.brown),
               ),
             ],
           ),
@@ -95,8 +92,9 @@ class LeaderboardPreview extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.orange.shade50,
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.orange.shade100),
                 ),
                 child: Row(
                   children: [
@@ -104,7 +102,7 @@ class LeaderboardPreview extends StatelessWidget {
                     const SizedBox(width: 6),
                     CircleAvatar(
                       radius: 16,
-                      backgroundColor: Colors.deepPurpleAccent,
+                      backgroundColor: Colors.orange.shade300,
                       backgroundImage:
                       entry.avatar != null ? NetworkImage(entry.avatar!) : null,
                       child: entry.avatar == null
@@ -127,14 +125,14 @@ class LeaderboardPreview extends StatelessWidget {
                             style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white),
+                                color: Colors.brown),
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             "${entry.points} نقطة",
                             style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.white.withOpacity(0.7)),
+                                color: Colors.brown.withOpacity(0.7)),
                           ),
                         ],
                       ),
@@ -151,20 +149,21 @@ class LeaderboardPreview extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.15),
+                color: Colors.orange.shade100,
                 borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.orange.shade200),
               ),
               child: Row(
                 children: [
                   Text(
                     "#$currentUserRank",
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.blue),
+                        fontWeight: FontWeight.bold, color: Colors.deepOrange),
                   ),
                   const SizedBox(width: 8),
                   const Text(
                     "موقعك الحالي",
-                    style: TextStyle(fontSize: 12, color: Colors.white),
+                    style: TextStyle(fontSize: 12, color: Colors.brown),
                   )
                 ],
               ),
@@ -179,8 +178,8 @@ class LeaderboardPreview extends StatelessWidget {
             child: OutlinedButton(
               onPressed: () {},
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.white),
-                foregroundColor: Colors.white,
+                side: BorderSide(color: Colors.deepOrange.shade400),
+                foregroundColor: Colors.brown,
               ),
               child: const Text("عرض القائمة الكاملة"),
             ),

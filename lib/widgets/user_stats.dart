@@ -27,17 +27,19 @@ class UserStats extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF3F51B5), Color(0xFF5C6BC0)],
+          colors: [Color(0xFFFFFAF3), Color(0xFFFFF1DC)], // بيج كريمي هادي
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.orange.withOpacity(0.15),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.white.withOpacity(0.3)),
+        border: Border.all(color: Colors.orange.shade100),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -45,72 +47,41 @@ class UserStats extends StatelessWidget {
           /// صورة + بيانات المستخدم
           Row(
             children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF2196F3), Color(0xFF42A5F5)],
-                      ),
-                    ),
-                    child: avatar != null
-                        ? ClipOval(
-                      child: Image.network(
-                        avatar!,
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                        : Center(
-                      child: Container(
-                        width: 56,
-                        height: 56,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey,
-                        ),
-                        child: Center(
-                          child: Text(
-                            username[0].toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
+              // Avatar
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border:
+                  Border.all(color: Colors.orange.shade200, width: 2),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFE0B2), Color(0xFFFFCC80)], // برتقالي فاتح هادي
+                  ),
+                ),
+                child: avatar != null
+                    ? ClipOval(
+                  child: Image.network(
+                    avatar!,
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                  ),
+                )
+                    : Center(
+                  child: Text(
+                    username[0].toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-
-                  /// أيقونة التاج
-                  Positioned(
-                    bottom: -4,
-                    right: -4,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.amber,
-                      ),
-                      child: const Icon(
-                        Icons.emoji_events,
-                        size: 14,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
               const SizedBox(width: 12),
 
-              /// اسم المستخدم + النقاط + الرصيد
+              /// اسم + النقاط + الرصيد
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,67 +91,56 @@ class UserStats extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
-                        color: Colors.white,
+                        color: Color(0xFF5D4037), // بني ناعم
                       ),
                     ),
 
                     // النقاط
-                    InkWell(
-                      onTap: () {
-                        // هنا ممكن تفتح صفحة history
-                      },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            points.toString(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.amber,
-                            ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star,
+                            color: Color(0xFFFFC107), size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          "$points نقطة",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF6D4C41),
                           ),
-                          const SizedBox(width: 4),
-                          const Text(
-                            "نقطة",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 6),
 
-                    // الرصيد + زر الإظهار/الإخفاء
+                    // الرصيد + زر إظهار/إخفاء
                     Row(
                       children: [
-                        Icon(
-                          Icons.account_balance_wallet,
-                          color: Colors.greenAccent.shade100,
-                          size: 18,
-                        ),
+                        const Icon(Icons.account_balance_wallet,
+                            color: Color(0xFF81C784), size: 18), // أخضر باستيل
                         const SizedBox(width: 6),
                         Text(
-                          showBalance ? "${balance.toStringAsFixed(2)} \$" : "****",
+                          showBalance
+                              ? "${balance.toStringAsFixed(2)} ر.ص"
+                              : "****",
                           style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF6D4C41),
                           ),
                         ),
                         IconButton(
                           icon: Icon(
-                            showBalance ? Icons.visibility_off : Icons.visibility,
-                            color: Colors.white70,
+                            showBalance
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey.shade500,
                             size: 18,
                           ),
                           onPressed: toggleBalance,
-                        )
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -193,46 +153,40 @@ class UserStats extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.15),
+              color: Colors.orange.shade50,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.blue.withOpacity(0.3)),
+              border: Border.all(color: Colors.orange.shade100),
             ),
             child: Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    Icon(Icons.emoji_events, size: 16, color: Colors.blue),
-                    SizedBox(width: 4),
+                    Icon(Icons.emoji_events,
+                        size: 20, color: Color(0xFFFFA000)), // ذهبي فاتح
+                    SizedBox(width: 6),
                     Text(
                       "ترتيبك الآن",
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: Color(0xFF8D6E63), // بني رملي
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "#$localRank",
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.trending_up, size: 14, color: Colors.blue),
-                  ],
+                const SizedBox(height: 6),
+                Text(
+                  "#$localRank",
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF5D4037),
+                  ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

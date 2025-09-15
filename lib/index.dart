@@ -60,7 +60,7 @@ class _IndexPageState extends State<IndexPage> {
     final isDropActive = Random().nextBool();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: const Color(0xFFFDF6EC), // 🎨 خلفية رملية
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -83,46 +83,23 @@ class _IndexPageState extends State<IndexPage> {
                 ),
 
                 const SizedBox(height: 20),
-                // ✅ أزرار الدخول والترتيب
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ActionButton(
-                        icon: "🐪",
-                        label: "دخول القافلة",
-                        onTap: () => Navigator.pushNamed(context, "/drop"),
-                        color: Colors.blue.shade400,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _ActionButton(
-                        icon: "🏆",
-                        label: "الترتيب",
-                        onTap: () => Navigator.pushNamed(context, "/leaderboard"),
-                        color: Colors.grey.shade300,
-                        textColor: Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
 
-                const SizedBox(height: 20),
-                // ✅ المربعات كلها متساوية
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: const [
-                    _NavCard(icon: "⛺", label: "الخيمة", route: "/profile"),
-                    _NavCard(icon: "💼", label: "المحفظة", route: "/wallet"),
-                    _NavCard(icon: "🏺", label: "مركز المقايضات", route: "/barter"),
-                    _NavCard(icon: "🎁", label: "مركز الجوائز", route: "/reward-center"),
-                    _NavCard(icon: "📜", label: "سجل القوافل", route: "/drop-history"),
-                    _NavCard(icon: "⚙️", label: "الإعدادات", route: "/settings"),
-                  ],
+                // ✅ سلايدر أفقي للأزرار
+                SizedBox(
+                  height: 140,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: const [
+                      _NavCard(icon: "🐪", label: "دخول القافلة", route: "/drop"),
+                      _NavCard(icon: "🏆", label: "الترتيب", route: "/leaderboard"),
+                      _NavCard(icon: "⛺", label: "الخيمة", route: "/profile"),
+                      _NavCard(icon: "💼", label: "المحفظة", route: "/wallet"),
+                      _NavCard(icon: "🏺", label: "المقايضات", route: "/barter"),
+                      _NavCard(icon: "🎁", label: "الجوائز", route: "/reward-center"),
+                      _NavCard(icon: "📜", label: "سجل القوافل", route: "/drop-history"),
+                      _NavCard(icon: "⚙️", label: "الإعدادات", route: "/settings"),
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 20),
@@ -149,47 +126,7 @@ class _IndexPageState extends State<IndexPage> {
   }
 }
 
-/// ✅ زرار actions (مظبوط بدون شادو)
-class _ActionButton extends StatelessWidget {
-  final String icon;
-  final String label;
-  final VoidCallback onTap;
-  final Color color;
-  final Color textColor;
-
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.color = Colors.blue,
-    this.textColor = Colors.white,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Text(icon, style: const TextStyle(fontSize: 22)),
-            const SizedBox(height: 6),
-            Text(label,
-                style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// ✅ كل كارت مربع متساوي
+/// ✅ كارت مربع للسلايدر
 class _NavCard extends StatelessWidget {
   final String icon;
   final String label;
@@ -203,27 +140,41 @@ class _NavCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1, // 👈 يخليها مربع
-      child: InkWell(
-        onTap: () => Navigator.pushNamed(context, route),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Colors.white, Color(0xFFF7F7F7)],
+    return Container(
+      width: 120,
+      margin: const EdgeInsets.only(right: 12),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: InkWell(
+          onTap: () => Navigator.pushNamed(context, route),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFBE6C2), Color(0xFFF9D29D)], // 🎨 تدرج رملي
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(2, 3))
+              ],
             ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(icon, style: const TextStyle(fontSize: 20)),
-              const SizedBox(height: 6),
-              Text(label, textAlign: TextAlign.center),
-            ],
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(icon, style: const TextStyle(fontSize: 22)),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF5D4037), // بني غامق
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -231,14 +182,16 @@ class _NavCard extends StatelessWidget {
   }
 }
 
-/// ✅ قسم الفائز الأسبوعي زي ما هو
+/// ✅ قسم الفائز الأسبوعي
 class _WeeklyWinnerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Colors.orange, Colors.amber]),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFD1913C), Color(0xFFFFD194)], // ذهبي رملي
+        ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 8)],
       ),
@@ -251,7 +204,7 @@ class _WeeklyWinnerSection extends StatelessWidget {
               color: Colors.white.withOpacity(0.3),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.flash_on, color: Colors.white),
+            child: const Icon(Icons.star, color: Colors.white),
           ),
           const SizedBox(height: 12),
           const Text("فائز كل أسبوع",
@@ -260,7 +213,7 @@ class _WeeklyWinnerSection extends StatelessWidget {
                   fontSize: 18,
                   color: Colors.white)),
           const SizedBox(height: 8),
-          const Text("كن من أفضل المتسابقين واربح جوائز قيمة كل أسبوع",
+          const Text("شارك وكن من أفضل المتسابقين واربح جوائز قيمة",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white70, fontSize: 14)),
           const SizedBox(height: 12),
@@ -269,8 +222,6 @@ class _WeeklyWinnerSection extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.white70),
               foregroundColor: Colors.white,
-              elevation: 0,
-              shadowColor: Colors.transparent,
             ),
             child: const Text("تفاصيل أكثر"),
           )

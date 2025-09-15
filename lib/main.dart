@@ -9,6 +9,8 @@ import 'splash.dart';
 import 'index.dart';
 import 'package:qafela/Leaderboard.dart';
 import 'package:qafela/Wallet.dart';
+import 'package:qafela/theme/desert_theme.dart.';
+
 
 
 
@@ -21,7 +23,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
       debugShowCheckedModeBanner: false,
+      theme:DesertTheme.theme,
       initialRoute: "/",
       routes: {
         "/": (context) => const SplashScreen(),
