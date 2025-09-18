@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:qafela/Leaderboard.dart';
 
 class LeaderboardEntry {
   final int rank;
@@ -176,7 +177,12 @@ class LeaderboardPreview extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LeaderboardScreen()), // هنا اسم الصفحة اللي عايز تروح لها
+                );
+              },
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: Colors.deepOrange.shade400),
                 foregroundColor: Colors.brown,

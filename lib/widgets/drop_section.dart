@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:qafela/DropScreen.dart';
 
 class DropItem {
   final String id;
@@ -192,7 +193,10 @@ class DropSection extends StatelessWidget {
                 ),
                 elevation: 2,
               ),
-              onPressed: () {},
+              onPressed: () {Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DropScreen()), // هنا اسم الصفحة اللي عايز تروح لها
+              );},
               icon: const Icon(Icons.inventory),
               label: const Text("دخول القافلة"),
             ),

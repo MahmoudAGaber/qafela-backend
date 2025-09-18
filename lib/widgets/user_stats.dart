@@ -1,33 +1,40 @@
 import 'package:flutter/material.dart';
 
-class UserStats extends StatelessWidget {
+class UserStats extends StatefulWidget {
   final String username;
   final int points;
-  final int worldRank;
   final int localRank;
   final double balance;
-  final bool showBalance;
-  final VoidCallback toggleBalance;
   final String? avatar;
 
   const UserStats({
     Key? key,
     required this.username,
     required this.points,
-    required this.worldRank,
     required this.localRank,
     required this.balance,
-    required this.showBalance,
-    required this.toggleBalance,
     this.avatar,
   }) : super(key: key);
+
+  @override
+  State<UserStats> createState() => _UserStatsState();
+}
+
+class _UserStatsState extends State<UserStats> {
+  bool _showBalance = false;
+
+  void _toggleBalance() {
+    setState(() {
+      _showBalance = !_showBalance;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFFFFAF3), Color(0xFFFFF1DC)], // بيج كريمي هادي
+          colors: [Color(0xFFFFFAF3), Color(0xFFFFF1DC)], // بيج كريمي
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -56,13 +63,13 @@ class UserStats extends StatelessWidget {
                   border:
                   Border.all(color: Colors.orange.shade200, width: 2),
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFFFE0B2), Color(0xFFFFCC80)], // برتقالي فاتح هادي
+                    colors: [Color(0xFFFFE0B2), Color(0xFFFFCC80)],
                   ),
                 ),
-                child: avatar != null
+                child: widget.avatar != null
                     ? ClipOval(
                   child: Image.network(
-                    avatar!,
+                    widget.avatar!,
                     width: 56,
                     height: 56,
                     fit: BoxFit.cover,
@@ -70,7 +77,7 @@ class UserStats extends StatelessWidget {
                 )
                     : Center(
                   child: Text(
-                    username[0].toUpperCase(),
+                    widget.username[0].toUpperCase(),
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -87,11 +94,11 @@ class UserStats extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      username,
+                      widget.username,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
-                        color: Color(0xFF5D4037), // بني ناعم
+                        color: Color(0xFF5D4037),
                       ),
                     ),
 
@@ -103,7 +110,7 @@ class UserStats extends StatelessWidget {
                             color: Color(0xFFFFC107), size: 18),
                         const SizedBox(width: 4),
                         Text(
-                          "$points نقطة",
+                          "${widget.points} نقطة",
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF6D4C41),
@@ -118,11 +125,11 @@ class UserStats extends StatelessWidget {
                     Row(
                       children: [
                         const Icon(Icons.account_balance_wallet,
-                            color: Color(0xFF81C784), size: 18), // أخضر باستيل
+                            color: Color(0xFF81C784), size: 18),
                         const SizedBox(width: 6),
                         Text(
-                          showBalance
-                              ? "${balance.toStringAsFixed(2)} ر.ص"
+                          _showBalance
+                              ? "${widget.balance.toStringAsFixed(2)} ر.ص"
                               : "****",
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
@@ -131,13 +138,13 @@ class UserStats extends StatelessWidget {
                         ),
                         IconButton(
                           icon: Icon(
-                            showBalance
+                            _showBalance
                                 ? Icons.visibility_off
                                 : Icons.visibility,
                             color: Colors.grey.shade500,
                             size: 18,
                           ),
-                          onPressed: toggleBalance,
+                          onPressed: _toggleBalance,
                         ),
                       ],
                     ),
@@ -163,13 +170,13 @@ class UserStats extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     Icon(Icons.emoji_events,
-                        size: 20, color: Color(0xFFFFA000)), // ذهبي فاتح
+                        size: 20, color: Color(0xFFFFA000)),
                     SizedBox(width: 6),
                     Text(
                       "ترتيبك الآن",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF8D6E63), // بني رملي
+                        color: Color(0xFF8D6E63),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -177,7 +184,7 @@ class UserStats extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  "#$localRank",
+                  "#${widget.localRank}",
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,

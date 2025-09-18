@@ -18,7 +18,6 @@ class _IndexPageState extends State<IndexPage> {
   final mockUser = {
     "username": "محمد جابر",
     "points": 2550,
-    "worldRank": 1438,
     "localRank": 86,
     "balance": 1420.50
   };
@@ -73,13 +72,8 @@ class _IndexPageState extends State<IndexPage> {
                 UserStats(
                   username: mockUser["username"] as String,
                   points: mockUser["points"] as int,
-                  worldRank: mockUser["worldRank"] as int,
                   localRank: mockUser["localRank"] as int,
                   balance: (mockUser["balance"] as num).toDouble(),
-                  showBalance: showBalance,
-                  toggleBalance: () {
-                    setState(() => showBalance = !showBalance);
-                  },
                 ),
 
                 const SizedBox(height: 20),
@@ -90,10 +84,10 @@ class _IndexPageState extends State<IndexPage> {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: const [
-                      _NavCard(icon: "🐪", label: "دخول القافلة", route: "/drop"),
+                      _NavCard(icon: "🐪", label: "القافلة", route: "/drop"),
                       _NavCard(icon: "🏆", label: "الترتيب", route: "/leaderboard"),
-                      _NavCard(icon: "⛺", label: "الخيمة", route: "/profile"),
-                      _NavCard(icon: "💼", label: "المحفظة", route: "/wallet"),
+                      _NavCard(icon: "⛺", label: "صفحتي", route: "/profile"),
+                      _NavCard(icon: "💼", label: "رصيدك", route: "/wallet"),
                       _NavCard(icon: "🏺", label: "المقايضات", route: "/barter"),
                       _NavCard(icon: "🎁", label: "الجوائز", route: "/reward-center"),
                       _NavCard(icon: "📜", label: "سجل القوافل", route: "/drop-history"),
@@ -103,6 +97,8 @@ class _IndexPageState extends State<IndexPage> {
                 ),
 
                 const SizedBox(height: 20),
+
+                // ✅ Drop Section مع حالة العد التنازلي
                 DropSection(
                   isActive: isDropActive,
                   nextDropTime: nextDropTime,
@@ -110,12 +106,17 @@ class _IndexPageState extends State<IndexPage> {
                 ),
 
                 const SizedBox(height: 20),
+
+                // ✅ Leaderboard Preview يظهر Top 3 فقط
                 LeaderboardPreview(
-                  entries: mockLeaderboard,
+                  entries: mockLeaderboard.take(3).toList(),
                   currentUserRank: mockUser["localRank"] as int,
                 ),
 
+
+
                 const SizedBox(height: 20),
+
                 _WeeklyWinnerSection(),
               ],
             ),
@@ -218,7 +219,7 @@ class _WeeklyWinnerSection extends StatelessWidget {
               style: TextStyle(color: Colors.white70, fontSize: 14)),
           const SizedBox(height: 12),
           OutlinedButton(
-            onPressed: () {},
+            onPressed: () => Navigator.pushNamed(context, "/weekly-winner"),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.white70),
               foregroundColor: Colors.white,
