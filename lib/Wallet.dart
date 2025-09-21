@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'theme/desert_theme.dart';
 
 class WalletPage extends StatefulWidget {
   const WalletPage({super.key});
@@ -42,15 +43,22 @@ class _WalletPageState extends State<WalletPage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Center(child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold))),
+        backgroundColor: DesertTheme.desertSand,
+        title: Center(
+          child: Text(title,
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: DesertTheme.dateBrown)),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: methods.map((m) {
             return ListTile(
               leading: Text(m["icon"] ?? "", style: const TextStyle(fontSize: 22)),
-              title: Text(m["name"] ?? ""),
+              title: Text(m["name"] ?? "",
+                  style: const TextStyle(color: DesertTheme.oliveBlack)),
               subtitle: Text("مدة المعالجة: ${m["processing"]}"),
-              trailing: Text(m["fee"] ?? ""),
+              trailing: Text(m["fee"] ?? "",
+                  style: const TextStyle(color: DesertTheme.palmGreen)),
             );
           }).toList(),
         ),
@@ -71,47 +79,92 @@ class _WalletPageState extends State<WalletPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: DesertTheme.desertSand,
       appBar: AppBar(
         title: const Text("المحفظة"),
-        actions: [
-          IconButton(
-            icon: Icon(showBalance ? Icons.visibility_off : Icons.visibility),
-            onPressed: () {
-              setState(() {
-                showBalance = !showBalance;
-              });
-            },
-          ),
-        ],
+        leading: IconButton(
+          icon: Icon(showBalance ? Icons.visibility_off : Icons.visibility),
+          onPressed: () {
+            setState(() {
+              showBalance = !showBalance;
+            });
+          },
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Balance Card
-          Card(
-            color: Colors.amber[200],
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          // Balance Card with Gradient
+          Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [DesertTheme.sandGold, DesertTheme.dateBrown],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text("الرصيد الحالي", style: TextStyle(fontSize: 14)),
-                  const SizedBox(height: 8),
+                  // عنوان مع الأيقونة
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.account_balance_wallet_rounded, color: Colors.white70, size: 22),
+                      SizedBox(width: 8),
+                      Text(
+                        "الرصيد المتاح",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // الرصيد
                   Text(
                     showBalance
                         ? "${walletData["balance"]} ${walletData["currency"]}"
                         : "••••••",
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.2,
+                    ),
                   ),
+
+                  // الرصيد المعلّق (إن وجد)
                   if ((walletData["pendingRewards"] as double) > 0)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text("${walletData["pendingRewards"]} دينار في الانتظار"),
+                      padding: const EdgeInsets.only(top: 12.0),
+                      /*child: Text(
+                        "${walletData["pendingRewards"]} دينار في الانتظار",
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),*/
                     ),
                 ],
               ),
             ),
           ),
+
           const SizedBox(height: 20),
 
           // Stats
@@ -123,11 +176,16 @@ class _WalletPageState extends State<WalletPage> {
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        const Icon(Icons.trending_up, color: Colors.green, size: 32),
+                        const Icon(Icons.trending_up,
+                            color: DesertTheme.palmGreen, size: 40),
                         const SizedBox(height: 8),
                         Text(showBalance ? "${walletData["totalEarned"]}" : "•••••",
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        const Text("إجمالي الأرباح"),
+                            style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: DesertTheme.oliveBlack)),
+                        const Text("إجمالي الأرباح",
+                            style: TextStyle(color: DesertTheme.palmGreen)),
                       ],
                     ),
                   ),
@@ -140,11 +198,16 @@ class _WalletPageState extends State<WalletPage> {
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        const Icon(Icons.credit_card, color: Colors.blue, size: 32),
+                        const Icon(Icons.receipt_long,
+                            color: DesertTheme.dateBrown, size: 40),
                         const SizedBox(height: 8),
                         Text("${transactions.length}",
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        const Text("عملية هذا الشهر"),
+                            style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: DesertTheme.oliveBlack)),
+                        const Text("عملية هذا الشهر",
+                            style: TextStyle(color: DesertTheme.palmGreen)),
                       ],
                     ),
                   ),
@@ -162,7 +225,10 @@ class _WalletPageState extends State<WalletPage> {
                   onPressed: () => _showMethodsDialog(withdrawalMethods, "طرق السحب"),
                   icon: const Icon(Icons.download),
                   label: const Text("سحب الأموال"),
-                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: DesertTheme.dateBrown,
+                    padding: const EdgeInsets.all(16),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -171,7 +237,11 @@ class _WalletPageState extends State<WalletPage> {
                   onPressed: () => _showMethodsDialog(depositMethods, "طرق الإيداع"),
                   icon: const Icon(Icons.upload),
                   label: const Text("إيداع الأموال"),
-                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
+                    side: const BorderSide(color: DesertTheme.dateBrown),
+                    foregroundColor: DesertTheme.dateBrown,
+                  ),
                 ),
               ),
             ],
@@ -179,36 +249,66 @@ class _WalletPageState extends State<WalletPage> {
           const SizedBox(height: 20),
 
           // Transaction History
-          Card(
+          const Text("📋 سجل المعاملات",
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: DesertTheme.oliveBlack)),
+          const SizedBox(height: 12),
+
+          transactions.isEmpty
+              ? Center(
             child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("📋 سجل المعاملات",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  ...transactions.map((t) {
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: t["type"] == "purchase" ? Colors.red[100] : Colors.green[100],
-                        child: _getTransactionIcon(t["type"] as String),
-                      ),
-                      title: Text(t["item"] as String),
-                      subtitle: Text("${t["date"]} • ${t["time"]}"),
-                      trailing: Text(
-                        "${t["amount"]} دينار",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: _getTransactionColor(t["type"] as String),
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-              ),
+              padding: const EdgeInsets.all(20.0),
+              child: Text("لا توجد معاملات حتى الآن 🏜️",
+                  style: TextStyle(
+                      color: DesertTheme.palmGreen, fontSize: 16)),
             ),
           )
+              : Column(
+            children: transactions.map((t) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: t["type"] == "purchase"
+                            ? Colors.red[100]
+                            : Colors.green[100],
+                        child: _getTransactionIcon(t["type"] as String),
+                      ),
+                      Container(
+                        width: 2,
+                        height: 40,
+                        color: Colors.grey.shade300,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Card(
+                      child: ListTile(
+                        title: Text(t["item"] as String,
+                            style: const TextStyle(
+                                color: DesertTheme.oliveBlack)),
+                        subtitle: Text("${t["date"]} • ${t["time"]}",
+                            style: const TextStyle(
+                                color: DesertTheme.palmGreen)),
+                        trailing: Text(
+                          "${t["amount"]} دينار",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: _getTransactionColor(t["type"] as String),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
         ],
       ),
     );

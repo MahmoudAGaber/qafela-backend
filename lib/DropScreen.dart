@@ -1,5 +1,31 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'dart:math';
+
+class DropVisual {
+  final String shape;
+  final String primaryColor;
+  final String secondaryColor;
+  final String symbol;
+  final String animation;
+
+  DropVisual({
+    required this.shape,
+    required this.primaryColor,
+    required this.secondaryColor,
+    required this.symbol,
+    required this.animation,
+  });
+}
+
+final Map<String, DropVisual> dropVisualMap = {
+  "i1": DropVisual(shape: 'rectangle', primaryColor: '#FFD700', secondaryColor: '#FFE066', symbol: '🎁', animation: 'glow'),
+  "i2": DropVisual(shape: 'rectangle', primaryColor: '#800080', secondaryColor: '#D8BFD8', symbol: '⚔️', animation: 'shake'),
+  "i3": DropVisual(shape: 'circle', primaryColor: '#C0C0C0', secondaryColor: '#FFFFFF', symbol: '💍', animation: 'rotate'),
+  "i4": DropVisual(shape: 'rectangle', primaryColor: '#87CEFA', secondaryColor: '#B0E0E6', symbol: '🧪', animation: 'bounce'),
+  "i5": DropVisual(shape: 'multiFacet', primaryColor: '#1E90FF', secondaryColor: '#ADD8E6', symbol: '💎', animation: 'glow'),
+  "i6": DropVisual(shape: 'rectangle', primaryColor: '#FFA500', secondaryColor: '#FFD580', symbol: '💳', animation: 'shake'),
+};
 
 class DropScreen extends StatefulWidget {
   const DropScreen({super.key});
@@ -8,21 +34,19 @@ class DropScreen extends StatefulWidget {
   State<DropScreen> createState() => _DropScreenState();
 }
 
-class _DropScreenState extends State<DropScreen> {
-  // حالة المستخدم
-  double balance = 200.0; // رصيد بالدينار (double)
-  int points = 50; // نقاط (int)
-
-  // معلومات القافلة
-  int participants = 234;
+class _DropScreenState extends State<DropScreen> with TickerProviderStateMixin {
+  double balance = 500.0;
+  int points = 2550;
   late DateTime targetTime;
   late Timer _timer;
   Duration remaining = Duration.zero;
-
-  // سجل مشتريات بسيط
   final List<Map<String, dynamic>> purchaseHistory = [];
 
-  // عناصر القافلة — كل عنصر له سعر stock points barter إلزاميًا
+  late AnimationController _glowController;
+  late AnimationController _rotateController;
+  late AnimationController _shakeController;
+  late AnimationController _bounceController;
+
   final List<Map<String, dynamic>> items = [
     {
       "id": "i1",
@@ -32,7 +56,6 @@ class _DropScreenState extends State<DropScreen> {
       "barter": false,
       "stock": 5,
       "maxStock": 5,
-      "icon": Icons.workspace_premium,
       "rarity": "rare",
       "description": "صندوق يحتوي على مكافآت"
     },
@@ -44,7 +67,6 @@ class _DropScreenState extends State<DropScreen> {
       "barter": false,
       "stock": 2,
       "maxStock": 2,
-      "icon": Icons.security,
       "rarity": "legendary",
       "description": "سيف ذو قوة عالية"
     },
@@ -53,10 +75,9 @@ class _DropScreenState extends State<DropScreen> {
       "name": "خاتم أثري",
       "price": 80.0,
       "points": 0,
-      "barter": true, // قابل للمقايضة: يخصم رصيد لكن لا يعطي نقاط
+      "barter": true,
       "stock": 3,
       "maxStock": 3,
-      "icon": Icons.circle,
       "rarity": "legendary",
       "description": "عنصر نادر للمقايضة"
     },
@@ -68,7 +89,6 @@ class _DropScreenState extends State<DropScreen> {
       "barter": false,
       "stock": 10,
       "maxStock": 10,
-      "icon": Icons.local_drink,
       "rarity": "common",
       "description": "تعزيز سريع للنقاط"
     },
@@ -80,7 +100,6 @@ class _DropScreenState extends State<DropScreen> {
       "barter": false,
       "stock": 4,
       "maxStock": 4,
-      "icon": Icons.diamond,
       "rarity": "rare",
       "description": "جوهرة ثمينة"
     },
@@ -92,7 +111,6 @@ class _DropScreenState extends State<DropScreen> {
       "barter": true,
       "stock": 6,
       "maxStock": 6,
-      "icon": Icons.card_giftcard,
       "rarity": "rare",
       "description": "بطاقة خاصة للمقايضة"
     },
@@ -101,7 +119,6 @@ class _DropScreenState extends State<DropScreen> {
   @override
   void initState() {
     super.initState();
-    // اضبط وقت القافلة — مثال: ساعة ونصف من الآن
     targetTime = DateTime.now().add(const Duration(hours: 1, minutes: 30));
     remaining = targetTime.difference(DateTime.now());
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -110,81 +127,55 @@ class _DropScreenState extends State<DropScreen> {
         remaining = diff.isNegative ? Duration.zero : diff;
       });
     });
+
+    _glowController = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
+    _rotateController = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat();
+    _shakeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500))..repeat(reverse: true);
+    _bounceController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))..repeat(reverse: true);
   }
 
   @override
   void dispose() {
     _timer.cancel();
+    _glowController.dispose();
+    _rotateController.dispose();
+    _shakeController.dispose();
+    _bounceController.dispose();
     super.dispose();
   }
 
-  String formatDuration(Duration d) {
-    if (d.inSeconds <= 0) return "00:00:00";
-    String two(int n) => n.toString().padLeft(2, "0");
-    return "${two(d.inHours)}:${two(d.inMinutes.remainder(60))}:${two(d.inSeconds.remainder(60))}";
-  }
+  bool isBarter(Map<String, dynamic> item) => (item["barter"] as bool?) ?? false;
 
-  // تحقق آمن من قابلية المقايضة
-  bool isBarter(Map<String, dynamic> item) {
-    return (item["barter"] as bool?) ?? false;
-  }
+  void _showMsg(String txt) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(txt)));
 
-  // عملية الشراء مع تأكيد وحفظ سجل
   Future<void> handlePurchaseConfirm(int index) async {
     final item = items[index];
     final price = (item["price"] as num).toDouble();
     final stock = (item["stock"] as num?)?.toInt() ?? 0;
     final pointsGain = (item["points"] as num?)?.toInt() ?? 0;
 
-    // قاعدة: إذا انتهت القافلة لا يمكن الشراء
-    if (remaining.inSeconds <= 0) {
-      _showMsg("انتهت القافلة ولا يمكن الشراء الآن.");
-      return;
-    }
-
-    if (stock <= 0) {
-      _showMsg("العنصر غير متوفر حالياً.");
-      return;
-    }
-
-    if (balance < price) {
-      _showMsg("رصيدك غير كافٍ.");
+    if (remaining.inSeconds <= 0 || stock <= 0 || balance < price) {
+      _showMsg(stock <= 0 ? "العنصر غير متوفر" : "رصيدك غير كافٍ أو انتهت القافلة");
       return;
     }
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text("تأكيد الشراء"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("${item["name"]}"),
-              const SizedBox(height: 8),
-              Text("السعر: ${price.toStringAsFixed(2)} ر.ص"),
-              isBarter(item)
-                  ? const Text("نوع: قابل للمقايضة (لا يعطي نقاط)")
-                  : Text("تكسب: +${pointsGain} نقطة"),
-            ],
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text("إلغاء")),
-            ElevatedButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text("تأكيد")),
-          ],
-        );
-      },
+      builder: (ctx) => AlertDialog(
+        title: Text("تأكيد شراء ${item["name"]}"),
+        content: Text(isBarter(item) ? "قابل للمقايضة" : "تكسب +$pointsGain نقطة"),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text("إلغاء")),
+          ElevatedButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text("تأكيد")),
+        ],
+      ),
     );
 
     if (confirmed == true) {
-      // تنفيذ الشراء
       setState(() {
-        balance = (balance - price);
+        balance -= price;
         items[index]["stock"] = stock - 1;
-        if (!isBarter(item)) {
-          points += pointsGain;
-        }
-        // سجل الشراء
+        if (!isBarter(item)) points += pointsGain;
         purchaseHistory.insert(0, {
           "time": DateTime.now(),
           "name": item["name"],
@@ -192,25 +183,8 @@ class _DropScreenState extends State<DropScreen> {
           "points": isBarter(item) ? 0 : pointsGain,
         });
       });
-
-      // رسالة نجاح
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text("تم الشراء ✅"),
-          content: Text(
-            isBarter(item)
-                ? "${item["name"]} اشتريت بنجاح (قابل للمقايضة). -${price.toStringAsFixed(2)} ر.ص"
-                : "${item["name"]} اشتريت بنجاح. -${price.toStringAsFixed(2)} ر.ص  +$pointsGain نقاط",
-          ),
-          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("حسناً"))],
-        ),
-      );
+      _showMsg("${item["name"]} تم الشراء بنجاح ✅");
     }
-  }
-
-  void _showMsg(String txt) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(txt)));
   }
 
   Color rarityColor(String? r) {
@@ -226,87 +200,352 @@ class _DropScreenState extends State<DropScreen> {
     }
   }
 
+  Widget animatedSymbol(DropVisual visual) {
+    switch (visual.animation) {
+      case 'glow':
+        return FadeTransition(
+          opacity: _glowController.drive(Tween(begin: 0.5, end: 1.0)),
+          child: Text(visual.symbol, style: const TextStyle(fontSize: 36)),
+        );
+      case 'rotate':
+        return RotationTransition(
+          turns: _rotateController,
+          child: Text(visual.symbol, style: const TextStyle(fontSize: 36)),
+        );
+      case 'shake':
+        return AnimatedBuilder(
+          animation: _shakeController,
+          builder: (context, child) {
+            double offset = sin(_shakeController.value * pi * 4) * 4;
+            return Transform.translate(offset: Offset(offset, 0), child: child);
+          },
+          child: Text(visual.symbol, style: const TextStyle(fontSize: 36)),
+        );
+      case 'bounce':
+        return SlideTransition(
+          position: _bounceController.drive(Tween(begin: const Offset(0,0.1), end: const Offset(0,-0.1))),
+          child: Text(visual.symbol, style: const TextStyle(fontSize: 36)),
+        );
+      default:
+        return Text(visual.symbol, style: const TextStyle(fontSize: 36));
+    }
+  }
+
+
+  Widget _buildHeaderCard() {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFF3E0), Color(0xFFFFE0B2)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // الرصيد والنقاط
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("رصيدك", style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text("${balance.toStringAsFixed(2)} د.ع",
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("نقاطك", style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text("$points", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ],
+            ),
+
+            // الدائرة مع الوقت المتبقي
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 70,
+                  height: 70,
+                  child: CircularProgressIndicator(
+                    value: remaining.inSeconds / (1.5 * 3600), // نسبة الوقت المتبقي من 1.5 ساعة
+                    strokeWidth: 6,
+                    backgroundColor: Colors.grey.shade300,
+                    color: remaining.inSeconds > 60 ? Colors.green : Colors.redAccent,
+                  ),
+                ),
+                Text(
+                  "${remaining.inHours.toString().padLeft(2,'0')}:${remaining.inMinutes.remainder(60).toString().padLeft(2,'0')}:${remaining.inSeconds.remainder(60).toString().padLeft(2,'0')}",
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     final bool active = remaining.inSeconds > 0;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("⚡ قافلة"),
-        centerTitle: true,
-        actions: [
-          Row(
-            children: [
-              const Icon(Icons.group, size: 20),
-              const SizedBox(width: 6),
-              Text("$participants"),
-              const SizedBox(width: 12),
-            ],
-          )
-        ],
-      ),
+      appBar: AppBar(title: const Text("⚡ قافلة"), centerTitle: true),
       body: CustomScrollView(
         slivers: [
-          // Header: رصيد ونقاط وعداد
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFFFFF3E0), Color(0xFFFFE0B2)]),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFF3E0), Color(0xFFFFC107)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    // Balance
-                    Column(
-                      children: [
-                        const Text("رصيدك", style: TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 6),
-                        Text("${balance.toStringAsFixed(2)} د.ع", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      ],
+                    // اليسار: الرصيد والنقاط جنب بعض
+                    Expanded(
+                      flex: 2,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          // الرصيد
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.amberAccent.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text("رصيدك", style: TextStyle(fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 400),
+                                  transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+                                  child: Text(
+                                    "${balance.toStringAsFixed(2)} د.ع",
+                                    key: ValueKey(balance),
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // النقاط
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.amberAccent.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text("نقاطك", style: TextStyle(fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 400),
+                                  transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+                                  child: Text(
+                                    "$points",
+                                    key: ValueKey(points),
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
 
-                    // Points
-                    Column(
-                      children: [
-                        const Text("نقاطك", style: TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 6),
-                        Text("$points", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      ],
+                    // اليمين: دائرة الوقت
+                    Expanded(
+                      flex: 1,
+                      child: SizedBox(
+                        width: 110,
+                        height: 110,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // خلفية الدائرة: تدرج عصري
+                            Container(
+                              width: 110,
+                              height: 110,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  colors: [Colors.white, Colors.white30],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.purple.shade200.withOpacity(0.5),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // الدائرة المتحركة حسب الوقت
+                            SizedBox(
+                              width: 95,
+                              height: 95,
+                              child: CircularProgressIndicator(
+                                value: remaining.inSeconds / (1.5 * 3600),
+                                strokeWidth: 10,
+                                backgroundColor: Colors.white.withOpacity(0.2),
+                                valueColor: AlwaysStoppedAnimation(
+                                  remaining.inSeconds > 300 ? Colors.amber: Colors.redAccent,
+                                ),
+                              ),
+                            ),
+
+                            // محتوى الدائرة: أيقونة + الوقت المتبقي
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.timer, size: 28, color: Colors.black),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "${remaining.inHours.toString().padLeft(2, '0')}:${remaining.inMinutes.remainder(60).toString().padLeft(2, '0')}:${remaining.inSeconds.remainder(60).toString().padLeft(2, '0')}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black26,
+                                        offset: Offset(1, 1),
+                                        blurRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
 
-                    // Countdown
-                    Column(
-                      children: [
-                        const Text("الوقت المتبقي", style: TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 6),
-                        Text(formatDuration(remaining), style: TextStyle(fontSize: 14, color: active ? Colors.black : Colors.redAccent)),
-                      ],
-                    ),
+
                   ],
                 ),
               ),
             ),
-          ),
+          )
+          ,
 
-          // Title
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("المتجر", style: Theme.of(context).textTheme.titleLarge),
-                  Text(active ? "قافلة نشطة" : "انتهت القافلة", style: TextStyle(color: active ? Colors.green : Colors.red)),
-                ],
+
+
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                "🛒 سجل المشتريات",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
               ),
             ),
           ),
+          purchaseHistory.isEmpty
+              ? SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(
+                child: Text(
+                  "لا توجد مشتريات بعد",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ),
+          )
+              : SliverList(
+            delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                final purchase = purchaseHistory[index];
+                final time = purchase["time"] as DateTime;
+                return Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: ListTile(
+                    leading: Icon(Icons.shopping_bag, color: Colors.orangeAccent),
+                    title: Text(
+                      purchase["name"],
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      purchase["points"] > 0
+                          ? "السعر: ${purchase["price"].toStringAsFixed(0)} د.ع | نقاط: ${purchase["points"]}"
+                          : "السعر: ${purchase["price"].toStringAsFixed(0)} د.ع | قابل للمقايضة",
+                    ),
+                    trailing: Text(
+                      "${time.hour.toString().padLeft(2,'0')}:${time.minute.toString().padLeft(2,'0')}:${time.second.toString().padLeft(2,'0')}",
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ),
+                );
+              },
+              childCount: purchaseHistory.length,
+            ),
+          ),
 
-          // Grid: العناصر
+
+
+          // --- Grid العناصر ---
           SliverPadding(
             padding: const EdgeInsets.all(12),
             sliver: SliverGrid(
@@ -315,54 +554,52 @@ class _DropScreenState extends State<DropScreen> {
                   final item = items[index];
                   final stock = (item["stock"] as num?)?.toInt() ?? 0;
                   final maxStock = (item["maxStock"] as num?)?.toInt() ?? 0;
+                  final visual = dropVisualMap[item["id"]]!;
+                  final canBuy = active && stock > 0 && balance >= (item["price"] as num).toDouble();
                   final price = (item["price"] as num).toDouble();
                   final pointsGain = (item["points"] as num?)?.toInt() ?? 0;
                   final barter = isBarter(item);
-                  final canBuy = active && stock > 0 && balance >= price;
 
                   return Card(
                     elevation: 3,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     child: Padding(
-                      padding: const EdgeInsets.all(1),//كانت 12
+                      padding: const EdgeInsets.all(8.0),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(item["icon"] as IconData, size: 36, color: rarityColor(item["rarity"] as String?)),
-                          const SizedBox(height: 8),
+                          animatedSymbol(visual),
+                          const SizedBox(height: 6),
                           Text(item["name"], textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(item["description"] ?? "", textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),
                           const SizedBox(height: 6),
-                          Text(item["description"] ?? "", textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Colors.grey[700])),
-                          const SizedBox(height: 8),
 
-                          // price & type
-                          Text("السعر: ${price.toStringAsFixed(0)} د.ع", style: const TextStyle(fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 6),
-                          barter
-                              ? const Text("قابل للمقايضة", style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold))
-                              : Text("+${pointsGain} نقطة", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                          // السعر والنقاط
+                          Text(
+                            barter ? "قابل للمقايضة" : "السعر: ${price.toStringAsFixed(0)} د.ع  +$pointsGain نقطة",
+                            style: TextStyle(
+                              color: barter ? Colors.deepOrange : Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
 
-                          const SizedBox(height: 8),
-                          // stock progress
+                          const Spacer(),
                           LinearProgressIndicator(
                             value: maxStock > 0 ? stock / maxStock : 0,
-                            minHeight: 8,
                             color: rarityColor(item["rarity"] as String?),
                             backgroundColor: Colors.grey[200],
                           ),
+                          Text("المخزون: $stock / $maxStock", style: const TextStyle(fontSize: 12)),
                           const SizedBox(height: 6),
-                          Text("المخزون: $stock / $maxStock", style: const TextStyle(fontSize: 12, color: Colors.black54)),
-
-                          const Spacer(),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: canBuy ? () => handlePurchaseConfirm(index) : null,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: canBuy ? Colors.orange : Colors.grey,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
-                              child: Text(canBuy ? "شراء ${price.toStringAsFixed(0)} د.ع" : (stock <= 0 ? "غير متوفر" : (active ? "رصيد غير كافٍ" : "انتهت القافلة"))),
+                              child: Text(canBuy ? "شراء" : stock <= 0 ? "غير متوفر" : "رصيد غير كافٍ"),
                             ),
                           ),
                         ],
@@ -380,66 +617,35 @@ class _DropScreenState extends State<DropScreen> {
               ),
             ),
           ),
-
-          // Rules + purchase history section
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        children: const [
-                          Text("📜 قواعد القافلة", style: TextStyle(fontWeight: FontWeight.bold)),
-                          SizedBox(height: 6),
-                          Text("• كل عنصر له كمية محدودة"),
-                          Text("• الشراء يتم بترتيب الوصول"),
-                          Text("• لا يمكن إلغاء أو استرداد المشتريات"),
-                          Text("• تنتهي القافلة عند انتهاء الوقت"),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("🧾 سجل المشتريات الأخير", style: TextStyle(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 8),
-                          if (purchaseHistory.isEmpty)
-                            const Text("لا توجد عمليات شراء بعد.")
-                          else
-                            ...purchaseHistory.take(5).map((h) {
-                              final dt = h["time"] as DateTime;
-                              final name = h["name"] as String;
-                              final price = (h["price"] as num).toDouble();
-                              final pts = (h["points"] as num).toInt();
-                              return ListTile(
-                                dense: true,
-                                leading: const Icon(Icons.shopping_bag, size: 20),
-                                title: Text(name),
-                                subtitle: Text("${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}"),
-                                trailing: Text("-${price.toStringAsFixed(0)} د.ع${pts>0? '  +$pts نقطة':''}"),
-                              );
-                            }),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // bottom spacing
-          SliverToBoxAdapter(child: const SizedBox(height: 40)),
         ],
       ),
     );
+  }
+}
+
+// --- HalfCirclePainter ---
+class HalfCirclePainter extends CustomPainter {
+  final double progress; // 0.0 to 1.0
+  final Color color;
+
+  HalfCirclePainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height * 2);
+    final startAngle = pi; // البداية من اليسار
+    final sweepAngle = pi * progress; // نصف دائرة
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 6
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(rect, startAngle, sweepAngle, false, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant HalfCirclePainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }
