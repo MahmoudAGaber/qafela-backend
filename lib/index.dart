@@ -4,6 +4,9 @@ import '../widgets/game_header.dart';
 import '../widgets/user_stats.dart';
 import '../widgets/leaderboard_preview.dart';
 import '../widgets/drop_section.dart';
+import 'package:provider/provider.dart';
+import 'widgets/wallet_service.dart';
+
 
 class IndexPage extends StatefulWidget {
   const IndexPage({super.key});
@@ -19,7 +22,8 @@ class _IndexPageState extends State<IndexPage> {
     "username": "محمد جابر",
     "points": 2550,
     "localRank": 86,
-    "balance": 1420.50
+
+
   };
 
   final mockLeaderboard = [
@@ -73,7 +77,7 @@ class _IndexPageState extends State<IndexPage> {
                   username: mockUser["username"] as String,
                   points: mockUser["points"] as int,
                   localRank: mockUser["localRank"] as int,
-                  balance: (mockUser["balance"] as num).toDouble(),
+
                 ),
 
                 const SizedBox(height: 20),

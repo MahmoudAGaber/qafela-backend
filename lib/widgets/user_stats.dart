@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:qafela/widgets/wallet_service.dart';
+
 
 class UserStats extends StatefulWidget {
   final String username;
   final int points;
   final int localRank;
-  final double balance;
   final String? avatar;
 
   const UserStats({
@@ -12,7 +14,6 @@ class UserStats extends StatefulWidget {
     required this.username,
     required this.points,
     required this.localRank,
-    required this.balance,
     this.avatar,
   }) : super(key: key);
 
@@ -31,10 +32,12 @@ class _UserStatsState extends State<UserStats> {
 
   @override
   Widget build(BuildContext context) {
+    final wallet = Provider.of<WalletService>(context); // ربط الرصيد بالمحفظة
+
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFFFFAF3), Color(0xFFFFF1DC)], // بيج كريمي
+          colors: [Color(0xFFFFFAF3), Color(0xFFFFF1DC)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -60,8 +63,7 @@ class _UserStatsState extends State<UserStats> {
                 height: 64,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border:
-                  Border.all(color: Colors.orange.shade200, width: 2),
+                  border: Border.all(color: Colors.orange.shade200, width: 2),
                   gradient: const LinearGradient(
                     colors: [Color(0xFFFFE0B2), Color(0xFFFFCC80)],
                   ),
@@ -129,7 +131,7 @@ class _UserStatsState extends State<UserStats> {
                         const SizedBox(width: 6),
                         Text(
                           _showBalance
-                              ? "${widget.balance.toStringAsFixed(2)} ر.ص"
+                              ? "${wallet.balance.toStringAsFixed(2)} ر.ص"
                               : "****",
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
@@ -169,8 +171,7 @@ class _UserStatsState extends State<UserStats> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    Icon(Icons.emoji_events,
-                        size: 20, color: Color(0xFFFFA000)),
+                    Icon(Icons.emoji_events, size: 20, color: Color(0xFFFFA000)),
                     SizedBox(width: 6),
                     Text(
                       "ترتيبك الآن",

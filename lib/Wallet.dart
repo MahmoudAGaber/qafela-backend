@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:qafela/widgets/wallet_service.dart';
 import 'theme/desert_theme.dart';
 
 class WalletPage extends StatefulWidget {
@@ -10,21 +12,6 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> {
   bool showBalance = true;
-
-  final walletData = {
-    "balance": 2850.50,
-    "currency": "دينار",
-    "pendingRewards": 150.00,
-    "totalEarned": 15420.75
-  };
-
-  final transactions = [
-    {"type": "purchase", "amount": -100, "item": "أموال - قافلة الخميس", "date": "2024-01-15", "time": "14:30"},
-    {"type": "reward", "amount": 500, "item": "جائزة المركز الثالث", "date": "2024-01-14", "time": "20:15"},
-    {"type": "purchase", "amount": -200, "item": "زيت - قافلة الأربعاء", "date": "2024-01-13", "time": "16:45"},
-    {"type": "reward", "amount": 1000, "item": "جائزة أسبوعية", "date": "2024-01-12", "time": "12:00"},
-    {"type": "purchase", "amount": -150, "item": "ذهب - قافلة الثلاثاء", "date": "2024-01-11", "time": "18:20"},
-  ];
 
   final withdrawalMethods = [
     {"name": "التحويل البنكي", "icon": "🏦", "processing": "1-3 أيام عمل", "fee": "مجاني"},
@@ -39,7 +26,11 @@ class _WalletPageState extends State<WalletPage> {
     {"name": "STC Pay", "icon": "📱", "processing": "فوري", "fee": "مجاني"},
   ];
 
-  void _showMethodsDialog(List<Map<String, String>> methods, String title) {
+  void _showMethodsDialog(List<Map<String, String>> methods, String title,
+      {bool isWithdraw = false}) {
+    final wallet = Provider.of<WalletService>(context, listen: false);
+    TextEditingController amountCtrl = TextEditingController();
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -51,33 +42,95 @@ class _WalletPageState extends State<WalletPage> {
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: methods.map((m) {
-            return ListTile(
-              leading: Text(m["icon"] ?? "", style: const TextStyle(fontSize: 22)),
-              title: Text(m["name"] ?? "",
-                  style: const TextStyle(color: DesertTheme.oliveBlack)),
-              subtitle: Text("مدة المعالجة: ${m["processing"]}"),
-              trailing: Text(m["fee"] ?? "",
-                  style: const TextStyle(color: DesertTheme.palmGreen)),
-            );
-          }).toList(),
+          children: [
+            // خانة إدخال المبلغ لكل من السحب والإيداع
+            TextField(
+              controller: amountCtrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: isWithdraw ? "المبلغ المطلوب" : "المبلغ للإيداع",
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...methods.map((m) {
+              return ListTile(
+                leading: Text(m["icon"] ?? "", style: const TextStyle(fontSize: 22)),
+                title: Text(m["name"] ?? "",
+                    style: const TextStyle(color: DesertTheme.oliveBlack)),
+                subtitle: Text("مدة المعالجة: ${m["processing"]}"),
+                trailing: Text(m["fee"] ?? "",
+                    style: const TextStyle(color: DesertTheme.palmGreen)),
+                onTap: () {
+                  final amount = double.tryParse(amountCtrl.text);
+                  if (amount == null || amount <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("الرجاء إدخال مبلغ صالح")),
+                    );
+                    return;
+                  }
+
+                  if (isWithdraw) {
+                    final int withdrawAmount = amount.toInt();
+
+                    if (withdrawAmount > wallet.balance) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("رصيدك غير كافٍ لإتمام السحب")),
+                      );
+                      return; // يمنع تنفيذ أي شيء آخر
+                    }
+
+                    wallet.addWithdrawRequest(withdrawAmount, method: m["name"] ?? "");
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(
+                              "تم إنشاء طلب سحب $withdrawAmount دينار عبر ${m["name"]}")),
+                    );
+                  }
+                  else {
+                    wallet.credit(amount.toInt()); // تحديث الرصيد مباشرة
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(
+                              "تم إضافة ${amount.toStringAsFixed(2)} دينار عبر ${m["name"]}")),
+                    );
+                  }
+                },
+              );
+            }).toList(),
+          ],
         ),
       ),
     );
   }
 
   Icon _getTransactionIcon(String type) {
-    return type == "purchase"
-        ? const Icon(Icons.north_east, color: Colors.red)
-        : const Icon(Icons.south_west, color: Colors.green);
+    switch (type) {
+      case "purchase":
+        return const Icon(Icons.north_east, color: Colors.red);
+      case "reward":
+        return const Icon(Icons.card_giftcard, color: Colors.green);
+      case "withdraw_request":
+        return const Icon(Icons.download, color: Colors.orange);
+      default:
+        return const Icon(Icons.swap_horiz, color: Colors.grey);
+    }
   }
 
   Color _getTransactionColor(String type) {
-    return type == "purchase" ? Colors.red : Colors.green;
+    return type == "purchase"
+        ? Colors.red
+        : type == "withdraw_request"
+        ? Colors.orange
+        : Colors.green;
   }
 
   @override
   Widget build(BuildContext context) {
+    final wallet = Provider.of<WalletService>(context);
+
     return Scaffold(
       backgroundColor: DesertTheme.desertSand,
       appBar: AppBar(
@@ -94,7 +147,7 @@ class _WalletPageState extends State<WalletPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Balance Card with Gradient
+          // Balance Card
           Container(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -116,11 +169,11 @@ class _WalletPageState extends State<WalletPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // عنوان مع الأيقونة
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Icon(Icons.account_balance_wallet_rounded, color: Colors.white70, size: 22),
+                      Icon(Icons.account_balance_wallet_rounded,
+                          color: Colors.white70, size: 22),
                       SizedBox(width: 8),
                       Text(
                         "الرصيد المتاح",
@@ -133,12 +186,8 @@ class _WalletPageState extends State<WalletPage> {
                     ],
                   ),
                   const SizedBox(height: 16),
-
-                  // الرصيد
                   Text(
-                    showBalance
-                        ? "${walletData["balance"]} ${walletData["currency"]}"
-                        : "••••••",
+                    showBalance ? "${wallet.balance.toStringAsFixed(2)} دينار" : "••••••",
                     style: const TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.bold,
@@ -146,20 +195,6 @@ class _WalletPageState extends State<WalletPage> {
                       letterSpacing: 1.2,
                     ),
                   ),
-
-                  // الرصيد المعلّق (إن وجد)
-                  if ((walletData["pendingRewards"] as double) > 0)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12.0),
-                      /*child: Text(
-                        "${walletData["pendingRewards"]} دينار في الانتظار",
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),*/
-                    ),
                 ],
               ),
             ),
@@ -179,7 +214,7 @@ class _WalletPageState extends State<WalletPage> {
                         const Icon(Icons.trending_up,
                             color: DesertTheme.palmGreen, size: 40),
                         const SizedBox(height: 8),
-                        Text(showBalance ? "${walletData["totalEarned"]}" : "•••••",
+                        Text(showBalance ? "${wallet.totalEarned}" : "•••••",
                             style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -201,12 +236,12 @@ class _WalletPageState extends State<WalletPage> {
                         const Icon(Icons.receipt_long,
                             color: DesertTheme.dateBrown, size: 40),
                         const SizedBox(height: 8),
-                        Text("${transactions.length}",
+                        Text("${wallet.transactions.length}",
                             style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: DesertTheme.oliveBlack)),
-                        const Text("عملية هذا الشهر",
+                        const Text("عملية",
                             style: TextStyle(color: DesertTheme.palmGreen)),
                       ],
                     ),
@@ -222,7 +257,8 @@ class _WalletPageState extends State<WalletPage> {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => _showMethodsDialog(withdrawalMethods, "طرق السحب"),
+                  onPressed: () =>
+                      _showMethodsDialog(withdrawalMethods, "طرق السحب", isWithdraw: true),
                   icon: const Icon(Icons.download),
                   label: const Text("سحب الأموال"),
                   style: ElevatedButton.styleFrom(
@@ -256,7 +292,7 @@ class _WalletPageState extends State<WalletPage> {
                   color: DesertTheme.oliveBlack)),
           const SizedBox(height: 12),
 
-          transactions.isEmpty
+          wallet.transactions.isEmpty
               ? Center(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -266,7 +302,7 @@ class _WalletPageState extends State<WalletPage> {
             ),
           )
               : Column(
-            children: transactions.map((t) {
+            children: wallet.transactions.map((t) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -289,17 +325,18 @@ class _WalletPageState extends State<WalletPage> {
                   Expanded(
                     child: Card(
                       child: ListTile(
-                        title: Text(t["item"] as String,
+                        title: Text(t["item"] ?? "",
                             style: const TextStyle(
                                 color: DesertTheme.oliveBlack)),
-                        subtitle: Text("${t["date"]} • ${t["time"]}",
+                        subtitle: Text(t["date"] ?? "",
                             style: const TextStyle(
                                 color: DesertTheme.palmGreen)),
                         trailing: Text(
                           "${t["amount"]} دينار",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: _getTransactionColor(t["type"] as String),
+                            color:
+                            _getTransactionColor(t["type"] as String),
                           ),
                         ),
                       ),

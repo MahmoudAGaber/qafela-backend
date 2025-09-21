@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // ✅ مهم لإدارة الحالة
 import 'package:qafela/BarterCenter.dart';
 import 'package:qafela/DropHistory.dart';
 import 'package:qafela/DropScreen.dart';
@@ -9,23 +10,26 @@ import 'splash.dart';
 import 'index.dart';
 import 'package:qafela/Leaderboard.dart';
 import 'package:qafela/Wallet.dart';
-import 'package:qafela/theme/desert_theme.dart.';
-
-
-
+import 'package:qafela/theme/desert_theme.dart';
+import 'package:qafela/widgets/wallet_service.dart'; // ✅ موجود جوه widgets
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => WalletService(), // ✅ هنا بنسجل المحفظة
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
       debugShowCheckedModeBanner: false,
-      theme:DesertTheme.theme,
+      theme: DesertTheme.theme,
       initialRoute: "/",
       routes: {
         "/": (context) => const SplashScreen(),
@@ -37,7 +41,7 @@ class MyApp extends StatelessWidget {
         "/profile": (context) => ProfilePage(),
         "/barter": (context) => BarterCenter(),
         "/reward-center": (context) => RewardCenterScreen(),
-        "/drop-history": (context) =>  DropHistoryScreen(),
+        "/drop-history": (context) => DropHistoryScreen(),
       },
     );
   }
