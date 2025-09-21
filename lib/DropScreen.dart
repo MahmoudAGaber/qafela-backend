@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math';
+
+import 'package:qafela/widgets/wallet_service.dart';
 
 class DropVisual {
   final String shape;
@@ -35,7 +38,7 @@ class DropScreen extends StatefulWidget {
 }
 
 class _DropScreenState extends State<DropScreen> with TickerProviderStateMixin {
-  double balance = 500.0;
+
   int points = 2550;
   late DateTime targetTime;
   late Timer _timer;
@@ -154,10 +157,12 @@ class _DropScreenState extends State<DropScreen> with TickerProviderStateMixin {
     final stock = (item["stock"] as num?)?.toInt() ?? 0;
     final pointsGain = (item["points"] as num?)?.toInt() ?? 0;
 
-    if (remaining.inSeconds <= 0 || stock <= 0 || balance < price) {
+    if (remaining.inSeconds <= 0 || stock <= 0 ||
+        Provider.of<WalletService>(context, listen: false).getBalance() < price) {
       _showMsg(stock <= 0 ? "العنصر غير متوفر" : "رصيدك غير كافٍ أو انتهت القافلة");
       return;
     }
+
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -173,7 +178,8 @@ class _DropScreenState extends State<DropScreen> with TickerProviderStateMixin {
 
     if (confirmed == true) {
       setState(() {
-        balance -= price;
+        Provider.of<WalletService>(context, listen: false).deductBalance(price, note: item["name"]);
+
         items[index]["stock"] = stock - 1;
         if (!isBarter(item)) points += pointsGain;
         purchaseHistory.insert(0, {
@@ -264,10 +270,18 @@ class _DropScreenState extends State<DropScreen> with TickerProviderStateMixin {
                   children: [
                     const Text("رصيدك", style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text("${balance.toStringAsFixed(2)} د.ع",
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Consumer<WalletService>(
+                      builder: (context, wallet, child) {
+                        return Text(
+                          "${wallet.getBalance().toStringAsFixed(2)} د.ع",
+                          key: ValueKey(wallet.getBalance()), // هيتحدث تلقائياً عند تغير الرصيد
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        );
+                      },
+                    ),
                   ],
                 ),
+
                 const SizedBox(height: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,15 +373,20 @@ class _DropScreenState extends State<DropScreen> with TickerProviderStateMixin {
                               children: [
                                 const Text("رصيدك", style: TextStyle(fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 4),
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 400),
-                                  transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
-                                  child: Text(
-                                    "${balance.toStringAsFixed(2)} د.ع",
-                                    key: ValueKey(balance),
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
+                                Consumer<WalletService>(
+                                  builder: (context, wallet, child) {
+                                    return AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 400),
+                                      transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+                                      child: Text(
+                                        "${wallet.getBalance().toStringAsFixed(2)} د.ع",
+                                        key: ValueKey(wallet.getBalance()),
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      ),
+                                    );
+                                  },
                                 ),
+
                               ],
                             ),
                           ),
@@ -555,7 +574,9 @@ class _DropScreenState extends State<DropScreen> with TickerProviderStateMixin {
                   final stock = (item["stock"] as num?)?.toInt() ?? 0;
                   final maxStock = (item["maxStock"] as num?)?.toInt() ?? 0;
                   final visual = dropVisualMap[item["id"]]!;
-                  final canBuy = active && stock > 0 && balance >= (item["price"] as num).toDouble();
+                  final wallet = Provider.of<WalletService>(context);
+                  final canBuy = active && stock > 0 && wallet.getBalance() >= (item["price"] as num).toDouble();
+
                   final price = (item["price"] as num).toDouble();
                   final pointsGain = (item["points"] as num?)?.toInt() ?? 0;
                   final barter = isBarter(item);

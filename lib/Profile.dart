@@ -4,6 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:qafela/Settings.dart';
 import 'package:qafela/splash.dart';
 import 'package:qafela/widgets/EditProfilePage.dart';
+import 'package:qafela/widgets/wallet_service.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -22,7 +24,6 @@ class _ProfilePageState extends State<ProfilePage>
     "id": "USR-0001",
     "email": "mohamed@example.com",
     "country": "🇸🇦 السعودية",
-    "balance": 1200.50,
     "points": 250,
     "lastDrop": "Drop #23 - 12/9/2025",
     "badges": ["🏆", "🥇", "🎖️"],
@@ -119,7 +120,8 @@ class _ProfilePageState extends State<ProfilePage>
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: value.toDouble()),
       duration: const Duration(seconds: 1),
-      builder: (context, val, child) => _buildStatCard(label, val.toInt().toString(), icon),
+      builder: (context, val, child) => _buildStatCard(label,
+          val.toStringAsFixed(2), icon),
     );
   }
 
@@ -206,10 +208,19 @@ class _ProfilePageState extends State<ProfilePage>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _animatedStat("الرصيد", user["balance"], Icons.account_balance_wallet),
+                        Consumer<WalletService>(
+                          builder: (context, wallet, child) {
+                            return _animatedStat(
+                              "الرصيد",
+                              wallet.balance,
+                              Icons.account_balance_wallet,
+                            );
+                          },
+                        ),
                         _animatedStat("النقاط", user["points"], Icons.star),
                       ],
                     ),
+
                     const SizedBox(height: 20),
 
                     // Last Drop

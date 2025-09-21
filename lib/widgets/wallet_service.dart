@@ -37,14 +37,18 @@ class WalletService extends ChangeNotifier {
     },
   ];
 
-  /// إضافة طلب سحب
-  void addWithdrawRequest(int amount, {String method = ""}) {
-    if (amount <= 0 || amount > balance) return;
+  /// جلب الرصيد الحالي
+  double getBalance() => balance;
 
-    balance -= amount;
+  /// إضافة طلب سحب
+  void addWithdrawRequest(num amount, {String method = ""}) {
+    double amt = amount.toDouble();
+    if (amt <= 0 || amt > balance) return;
+
+    balance -= amt;
     transactions.insert(0, {
       "type": "withdraw_request",
-      "amount": -amount,
+      "amount": -amt,
       "item": "طلب سحب عبر $method",
       "date": DateTime.now().toString().substring(0, 16),
     });
@@ -52,12 +56,13 @@ class WalletService extends ChangeNotifier {
   }
 
   /// إضافة رصيد (إيداع / جائزة)
-  void addBalance(double amount, {String note = "إيداع"}) {
-    balance += amount;
-    totalEarned += amount;
+  void addBalance(num amount, {String note = "إيداع"}) {
+    double amt = amount.toDouble();
+    balance += amt;
+    totalEarned += amt;
     transactions.insert(0, {
       "type": "reward",
-      "amount": amount,
+      "amount": amt,
       "item": note,
       "date": DateTime.now().toString().substring(0, 16),
     });
@@ -65,22 +70,37 @@ class WalletService extends ChangeNotifier {
   }
 
   /// خصم رصيد (شراء)
-  void deductBalance(double amount, {String note = "شراء"}) {
-    if (amount <= 0 || amount > balance) return;
-    balance -= amount;
+  void deductBalance(num amount, {String note = "شراء"}) {
+    double amt = amount.toDouble();
+    if (amt <= 0 || amt > balance) return;
+
+    balance -= amt;
     transactions.insert(0, {
       "type": "purchase",
-      "amount": -amount,
+      "amount": -amt,
       "item": note,
       "date": DateTime.now().toString().substring(0, 16),
     });
     notifyListeners();
   }
 
-  /// ---- إضافة دالة `credit` كـ واجهة متوافقة مع كود RewardCenter ----
-  /// RewardCenter ينادي wallet.credit(amount, source: 'reward_1')
-  void credit(int amount, {String source = 'unknown'}) {
-    // نحول int الى double ونمرّر المصدر كنوت (note)
-    addBalance(amount.toDouble(), note: source);
+  /// دالة `debit` (شراء مباشر)
+  void debit(num amount) {
+    double amt = amount.toDouble();
+    if (balance >= amt) {
+      balance -= amt;
+      transactions.insert(0, {
+        "type": "purchase",
+        "amount": -amt,
+        "item": "شراء من القافلة",
+        "date": DateTime.now().toString(),
+      });
+      notifyListeners();
+    }
+  }
+
+  /// دالة `credit` (مكافأة / إيداع) متوافقة مع int و double
+  void credit(num amount, {String source = 'unknown'}) {
+    addBalance(amount, note: source);
   }
 }
