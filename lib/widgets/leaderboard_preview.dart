@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:qafela/Leaderboard.dart';
 
 class LeaderboardEntry {
@@ -19,11 +18,15 @@ class LeaderboardEntry {
 class LeaderboardPreview extends StatelessWidget {
   final List<LeaderboardEntry> entries;
   final int? currentUserRank;
+  final int? currentUserPoints;
+  final String? currentUserName;
 
   const LeaderboardPreview({
     super.key,
     required this.entries,
     this.currentUserRank,
+    this.currentUserPoints,
+    this.currentUserName,
   });
 
   Widget getRankIcon(int rank) {
@@ -88,7 +91,7 @@ class LeaderboardPreview extends StatelessWidget {
 
           // أول 5 متسابقين
           Column(
-            children: entries.take(5).map((entry) {
+            children: entries.take(3).map((entry) {
               return Container(
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 padding: const EdgeInsets.all(6),
@@ -144,8 +147,8 @@ class LeaderboardPreview extends StatelessWidget {
             }).toList(),
           ),
 
-          // ترتيب المستخدم لو مش من أول 5
-          if (currentUserRank != null && currentUserRank! > 5) ...[
+          // ترتيب المستخدم الحالي (حتى لو مش من أول 5)
+          if (currentUserRank != null && currentUserPoints != null) ...[
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(8),
@@ -162,10 +165,23 @@ class LeaderboardPreview extends StatelessWidget {
                         fontWeight: FontWeight.bold, color: Colors.deepOrange),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    "موقعك الحالي",
-                    style: TextStyle(fontSize: 12, color: Colors.brown),
-                  )
+                  Expanded(
+                    child: Text(
+                      currentUserName ?? "أنت",
+                      style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.brown),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Text(
+                    "${currentUserPoints} نقطة",
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.brown),
+                  ),
                 ],
               ),
             )
@@ -180,7 +196,7 @@ class LeaderboardPreview extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => LeaderboardScreen()), // هنا اسم الصفحة اللي عايز تروح لها
+                  MaterialPageRoute(builder: (context) => LeaderboardScreen()),
                 );
               },
               style: OutlinedButton.styleFrom(

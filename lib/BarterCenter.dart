@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:qafela/widgets/wallet_service.dart';
 
 /// 🟢 نموذج عنصر المقايضة
 class BarterItem {
@@ -44,7 +46,7 @@ class _BarterCenterState extends State<BarterCenter> {
   BarterItem? selectedItem2;
   BarterItem? tempResultItem; // عرض مؤقت للنتيجة قبل التأكيد
 
-  int userPoints = 0;
+
   String historyFilter = "all"; // فلتر سجل المقايضات: all / used / unused
 
   List<Map<String, dynamic>> barterHistory = [];
@@ -189,26 +191,37 @@ class _BarterCenterState extends State<BarterCenter> {
   }
 
   void handleUseResult(BarterItem item, int recordId) {
-    setState(() {
-      userPoints += item.points;
+    final wallet = Provider.of<WalletService>(context, listen: false);
 
+    setState(() {
+      // ✅ أضف النقاط إلى المحفظة مباشرة
+      wallet.addPoints(item.points.toDouble());
+
+      // قلل الكمية من عناصر المستخدم
       final index = userItems.indexWhere((i) => i.id == item.id);
       if (index != -1) {
         userItems[index].quantity -= 1;
         if (userItems[index].quantity <= 0) userItems.removeAt(index);
       }
 
+      // عدل السجل (mark as used)
       final historyIndex = barterHistory.indexWhere((r) => r["id"] == recordId);
-      if (historyIndex != -1) barterHistory[historyIndex]["used"] = true;
+      if (historyIndex != -1) {
+        barterHistory[historyIndex]["used"] = true;
+      }
     });
 
+    // ✅ إشعار للمستخدم بعد التحويل
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("✅ تم تحويل ${item.name} إلى ${item.points} نقطة")),
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final wallet = Provider.of<WalletService>(context);
+    int userPoints = wallet.points.toInt();
     return Scaffold(
       backgroundColor: Colors.amber.shade50,
       appBar: AppBar(

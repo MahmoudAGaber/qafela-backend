@@ -24,7 +24,7 @@ class _ProfilePageState extends State<ProfilePage>
     "id": "USR-0001",
     "email": "mohamed@example.com",
     "country": "🇸🇦 السعودية",
-    "points": 250,
+
     "lastDrop": "Drop #23 - 12/9/2025",
     "badges": ["🏆", "🥇", "🎖️"],
     "leaderboardRank": 86
@@ -210,16 +210,26 @@ class _ProfilePageState extends State<ProfilePage>
                       children: [
                         Consumer<WalletService>(
                           builder: (context, wallet, child) {
-                            return _animatedStat(
-                              "الرصيد",
-                              wallet.balance,
-                              Icons.account_balance_wallet,
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _animatedStat(
+                                  "الرصيد",
+                                  wallet.balance,
+                                  Icons.account_balance_wallet,
+                                ),
+                                _animatedStat(
+                                  "النقاط",
+                                  wallet.points.toDouble(),
+                                  Icons.star,
+                                ),
+                              ],
                             );
                           },
                         ),
-                        _animatedStat("النقاط", user["points"], Icons.star),
                       ],
                     ),
+
 
                     const SizedBox(height: 20),
 

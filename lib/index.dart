@@ -7,7 +7,6 @@ import '../widgets/drop_section.dart';
 import 'package:provider/provider.dart';
 import 'widgets/wallet_service.dart';
 
-
 class IndexPage extends StatefulWidget {
   const IndexPage({super.key});
 
@@ -20,10 +19,7 @@ class _IndexPageState extends State<IndexPage> {
 
   final mockUser = {
     "username": "محمد جابر",
-    "points": 2550,
     "localRank": 86,
-
-
   };
 
   final mockLeaderboard = [
@@ -56,11 +52,38 @@ class _IndexPageState extends State<IndexPage> {
       isRare: true,
     ),
   ];
+  final List<Map<String, dynamic>> leaderboardData = [
+    {"rank": 1, "username": "أحمد الفائز", "points": 5500, "avatar": "🏆"},
+    {"rank": 2, "username": "فاطمة النجمة", "points": 4200, "avatar": "⭐"},
+    {"rank": 3, "username": "عبدالله السريع", "points": 3800, "avatar": "🚀"},
+    {"rank": 4, "username": "نورا المتميزة", "points": 3200, "avatar": "💎"},
+    {"rank": 5, "username": "خالد البطل", "points": 2900, "avatar": "🎯"},
+    {"rank": 6, "username": "سارة الذكية", "points": 2700, "avatar": "🧠"},
+    {"rank": 7, "username": "محمد الماهر", "points": 2500, "avatar": "⚡"},
+    {"rank": 8, "username": "ليلى المبدعة", "points": 2300, "avatar": "🎨"},
+    {"rank": 9, "username": "يوسف القوي", "points": 2100, "avatar": "💪"},
+    {"rank": 10, "username": "زينب الحكيمة", "points": 1900, "avatar": "🦉"},
+  ];
+
 
   @override
   Widget build(BuildContext context) {
     final nextDropTime = DateTime.now().add(const Duration(hours: 3));
     final isDropActive = Random().nextBool();
+    final wallet = Provider.of<WalletService>(context);
+    int currentUserPoints = wallet.points.toInt();
+    // --- 1) اعمل نسخة من الليستة الأساسية + أضف المستخدم الحالي ---
+    List<Map<String, dynamic>> allPlayers = List.from(leaderboardData)
+      ..add({
+        "username": "أنت",
+        "points": currentUserPoints,
+      });
+
+    // --- 2) رتب الليستة حسب النقاط ---
+    allPlayers.sort((a, b) => (b["points"] as int).compareTo(a["points"] as int));
+
+    // --- 3) استخرج ترتيب المستخدم الحالي ---
+    int currentUserRank = allPlayers.indexWhere((p) => p["username"] == "أنت") + 1;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFDF6EC), // 🎨 خلفية رملية
@@ -73,11 +96,11 @@ class _IndexPageState extends State<IndexPage> {
                 const GameHeader(logoPath: "lib/Assets/images/Logo.jpg"),
 
                 const SizedBox(height: 16),
+                // ✅ عرض إحصائيات المستخدم
                 UserStats(
                   username: mockUser["username"] as String,
-                  points: mockUser["points"] as int,
-                  localRank: mockUser["localRank"] as int,
-
+                  points: wallet.points.toInt(), // من WalletService
+                  localRank:  currentUserRank,
                 ),
 
                 const SizedBox(height: 20),
@@ -111,13 +134,15 @@ class _IndexPageState extends State<IndexPage> {
 
                 const SizedBox(height: 20),
 
-                // ✅ Leaderboard Preview يظهر Top 3 فقط
+                // ✅ Leaderboard Preview يظهر Top 3 + بيانات المستخدم
                 LeaderboardPreview(
-                  entries: mockLeaderboard.take(3).toList(),
-                  currentUserRank: mockUser["localRank"] as int,
-                ),
+                  entries: mockLeaderboard.take(5).toList(),
+                  currentUserRank: currentUserRank,       // المحسوب من LeaderboardScreen
+                  currentUserPoints: wallet.points.toInt(),
+                  currentUserName: mockUser["username"] as String,
+                )
 
-
+                ,
 
                 const SizedBox(height: 20),
 

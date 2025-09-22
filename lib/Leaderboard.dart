@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qafela/theme/desert_theme.dart';
-
-
+import 'package:provider/provider.dart';
+import 'package:qafela/widgets/wallet_service.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -26,9 +26,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with TickerProvid
   ];
 
   // current logged-in user (example)
-  int currentUserRank = 86;
-  int currentUserPoints = 2550;
-  String currentUserName = "أنت";
 
   // countdown
   late DateTime weekEndTime;
@@ -73,9 +70,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with TickerProvid
     return "$mins د ${remaining.inSeconds.remainder(60)} ث";
   }
 
-  double getTopPoints() {
-    if (leaderboardData.isEmpty) return 1.0;
-    return (leaderboardData.first["points"] as int).toDouble();
+  double getTopPoints(List<Map<String, dynamic>> source) {
+    if (source.isEmpty) return 1.0;
+    return (source.first["points"] as int).toDouble();
   }
 
   List<Color> gradientForRank(int rank) {
@@ -93,17 +90,57 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final topPoints = getTopPoints();
+    // جلب المحفظة (تأكد أن WalletService يحوي `points` و `username`)
+    final wallet = Provider.of<WalletService>(context);
+    int currentUserPoints = wallet.points.toInt();
+    int currentUserRank = leaderboardData
+        .where((e) => e["points"] > currentUserPoints)
+        .length + 1;
+    String currentUserName = "أنت"; // تقدر تجيبها من صفحة البروفايل
+
+    // ---- 1) نخلق نسخة من البيانات الأصلية (مانع تغيير الـ source الأصلي) ----
+    List<Map<String, dynamic>> fullData = leaderboardData.map((e) => Map<String, dynamic>.from(e)).toList();
+
+    // ---- 2) إزالة أي سجل قديم للمستخدم الحالي و إضافته بالقيمة الحقيقية من wallet ----
+    fullData.removeWhere((p) => p["username"] == currentUserName);
+    fullData.add({
+      "username": currentUserName,
+      "points": currentUserPoints,
+      "avatar": "👤",
+    });
+
+    // ---- 3) ترتيب تنازلي حسب النقاط ----
+    fullData.sort((a, b) => (b["points"] as int).compareTo(a["points"] as int));
+
+    // ---- 4) إعادة حساب الرتب (standard dense/simple) ----
+    for (int i = 0; i < fullData.length; i++) {
+      fullData[i]["rank"] = i + 1;
+    }
+
+    // ---- 5) استخراج top3 و others ----
+    final List<Map<String, dynamic>> top3 = fullData.length >= 3 ? fullData.sublist(0, 3) : fullData.toList();
+    final List<Map<String, dynamic>> others = fullData.length > 3 ? fullData.sublist(3) : <Map<String, dynamic>>[];
+
+    // ---- 6) تحديد ترتيب المستخدم الحالي ----
+    final currentUser = fullData.firstWhere((p) => p["username"] == currentUserName, orElse: () => {});
+    if (currentUser.isNotEmpty) {
+      currentUserRank = currentUser["rank"] as int;
+    } else {
+      currentUserRank = -1;
+    }
+
+    // ---- 7) topPoints لاحتساب النسب ----
+    final double topPoints = getTopPoints(fullData);
+
+    // === واجهة المستخدم ===
     return Scaffold(
       backgroundColor: DesertTheme.desertSand,
-
       appBar: AppBar(
         title: const Text("الترتيب الأسبوعي"),
         centerTitle: true,
         elevation: 0,
         backgroundColor: DesertTheme.dateBrown,
         foregroundColor: Colors.white,
-
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -144,12 +181,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with TickerProvid
         child: Column(
           children: [
             // ===== current user card (prominent) =====
-            _buildCurrentUserCard(),
+            _buildCurrentUserCard(currentUserPoints, currentUserRank),
 
             const SizedBox(height: 16),
 
             // ===== Podium (Top 3) =====
-            _buildPodium(),
+            _buildPodium(top3),
 
             const SizedBox(height: 18),
 
@@ -166,7 +203,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with TickerProvid
 
             // ===== remaining players list (rank 4+) =====
             Column(
-              children: leaderboardData.skip(3).map((player) {
+              children: others.map((player) {
                 final int rank = player["rank"] as int;
                 final String name = player["username"] as String;
                 final int pts = player["points"] as int;
@@ -197,7 +234,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with TickerProvid
     );
   }
 
-  Widget _buildCurrentUserCard() {
+  Widget _buildCurrentUserCard(int currentUserPoints, int currentUserRank) {
+    String currentUserName = "أنت"; // تقدر تجيبها من صفحة البروفايل
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -250,16 +288,16 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with TickerProvid
     );
   }
 
-  Widget _buildPodium() {
+  Widget _buildPodium(List<Map<String, dynamic>> top3) {
     // ensure we have at least 3 entries
-    final List<Map<String, dynamic>> top3 = leaderboardData.length >= 3 ? leaderboardData.sublist(0, 3) : leaderboardData;
+    final List<Map<String, dynamic>> podium = top3;
 
     // determine heights for visual podium
     double h1 = 130, h2 = 100, h3 = 90;
     // arrange positions: [2,1,3]
-    final left = top3.length >= 2 ? top3[1] : null;
-    final center = top3.isNotEmpty ? top3[0] : null;
-    final right = top3.length >= 3 ? top3[2] : null;
+    final left = podium.length >= 2 ? podium[1] : null;
+    final center = podium.isNotEmpty ? podium[0] : null;
+    final right = podium.length >= 3 ? podium[2] : null;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,

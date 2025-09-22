@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 class WalletService extends ChangeNotifier {
   double balance = 2850.50;
   double totalEarned = 15420.75;
+  double points = 2500; // إضافة النقاط الموحدة
 
   final List<Map<String, dynamic>> transactions = [
     {
@@ -103,4 +104,25 @@ class WalletService extends ChangeNotifier {
   void credit(num amount, {String source = 'unknown'}) {
     addBalance(amount, note: source);
   }
+
+// --- إدارة النقاط ---
+  void addPoints(double p) {
+    points += p;
+    notifyListeners();
+  }
+
+  void deductPoints(double p) {
+    if (p > points) return;
+    points -= p;
+    notifyListeners();
+  }
+
+  double getPoints() => points;
+
+
 }
+
+
+
+
+
