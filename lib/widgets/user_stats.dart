@@ -51,6 +51,7 @@ class _UserStatsState extends State<UserStats> {
         ],
         border: Border.all(color: Colors.orange.shade100),
       ),
+
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [

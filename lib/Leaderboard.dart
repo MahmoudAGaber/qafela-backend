@@ -90,18 +90,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    // جلب المحفظة (تأكد أن WalletService يحوي `points` و `username`)
+
+
     final wallet = Provider.of<WalletService>(context);
     int currentUserPoints = wallet.points.toInt();
     int currentUserRank = leaderboardData
         .where((e) => e["points"] > currentUserPoints)
         .length + 1;
-    String currentUserName = "أنت"; // تقدر تجيبها من صفحة البروفايل
+    String currentUserName = "أنت";
 
-    // ---- 1) نخلق نسخة من البيانات الأصلية (مانع تغيير الـ source الأصلي) ----
+
     List<Map<String, dynamic>> fullData = leaderboardData.map((e) => Map<String, dynamic>.from(e)).toList();
 
-    // ---- 2) إزالة أي سجل قديم للمستخدم الحالي و إضافته بالقيمة الحقيقية من wallet ----
+
     fullData.removeWhere((p) => p["username"] == currentUserName);
     fullData.add({
       "username": currentUserName,

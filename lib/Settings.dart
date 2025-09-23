@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:qafela/theme/theme_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -62,6 +64,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Icon(Icons.notifications, color: Colors.orange),
                 ),
               ),
+              SwitchListTile(
+                value: Provider.of<ThemeProvider>(context).isDark,
+                onChanged: (_) => Provider.of<ThemeProvider>(context, listen: false).toggleTheme(),
+                title: const Text("الوضع الليلي"),
+                subtitle: const Text("تبديل بين الوضع النهاري والليلي"),
+                secondary: const CircleAvatar(
+                  child: Icon(Icons.nightlight_round, color: Colors.orange),
+                ),
+              ),
+
               SwitchListTile(
                 value: soundsEnabled,
                 onChanged: (value) {

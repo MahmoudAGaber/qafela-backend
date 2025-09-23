@@ -19,7 +19,7 @@ class _IndexPageState extends State<IndexPage> {
 
   final mockUser = {
     "username": "محمد جابر",
-    "localRank": 86,
+   
   };
 
   final mockLeaderboard = [

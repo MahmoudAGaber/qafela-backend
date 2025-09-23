@@ -127,6 +127,7 @@ class _ProfilePageState extends State<ProfilePage>
 
   @override
   Widget build(BuildContext context) {
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -234,13 +235,18 @@ class _ProfilePageState extends State<ProfilePage>
                     const SizedBox(height: 20),
 
                     // Last Drop
-                    _infoCard("آخر Drop", user["lastDrop"], Icons.local_fire_department),
+                  /*  _infoCard("آخر Drop", user["lastDrop"], Icons.local_fire_department),
                     const SizedBox(height: 20),
 
                     // Leaderboard مختصر
-                    _infoCard("ترتيبك الحالي", "رقم ${user["leaderboardRank"]}", Icons.emoji_events),
+                    _infoCard(
+                      "ترتيبك الحالي",
+                      "رقم ${user["leaderboardRank"]}",
+                      Icons.emoji_events,
+                    ),
                     const SizedBox(height: 20),
 
+*/
                     // Buttons
                     _AnimatedButton(Icons.edit, "تعديل البيانات", () async {
                       final updatedUser = await Navigator.push(
