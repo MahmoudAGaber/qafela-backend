@@ -1,0 +1,142 @@
+{
+  "recipes": [
+    {
+      "input1": "lamb_leg",
+      "input2": "seeds",
+      "outputKey": "tajin_lahma",
+      "description": "Lamb and spices cooked with knowledge create tajin lahma"
+    },
+    {
+      "input1": "lamb_leg",
+      "input2": "arabic_bread",
+      "outputKey": "mansaf",
+      "description": "Lamb served with bread and tradition creates mansaf"
+    },
+    {
+      "input1": "dressed_chicken",
+      "input2": "basmati_rice",
+      "outputKey": "chicken_kabsa",
+      "description": "Chicken and rice cooked with Gulf tradition create kabsa"
+    },
+    {
+      "input1": "lamb_leg",
+      "input2": "basmati_rice",
+      "outputKey": "lamb_kabsa",
+      "description": "Lamb and rice combined with spice knowledge create lamb kabsa"
+    },
+    {
+      "input1": "warm_Dough",
+      "input2": "palm_fronds",
+      "outputKey": "arabic_bread",
+      "description": "Dough baked using palm tradition creates Arabic bread"
+    },
+    {
+      "input1": "wheat_Bundle",
+      "input2": "millstones",
+      "outputKey": "premium_flour",
+      "description": "Wheat ground with stone knowledge creates premium flour"
+    },
+    {
+      "input1": "premium_flour",
+      "input2": "water_bucket",
+      "outputKey": "warm_Dough",
+      "description": "Flour and water mixed with baking skill create dough"
+    },
+    {
+      "input1": "camel_milk",
+      "input2": "seeds",
+      "outputKey": "luxury_sweets_box",
+      "description": "Milk and spices transformed by tradition create luxury sweets"
+    },
+    {
+      "input1": "seeds",
+      "input2": "water_bucket",
+      "outputKey": "date_palm",
+      "description": "Seeds nurtured with water grow into a date palm"
+    },
+    {
+      "input1": "mudbricks",
+      "input2": "palm_fronds",
+      "outputKey": "heritage_house",
+      "description": "Mud and palm knowledge build a heritage house"
+    },
+    {
+      "input1": "concrete_bricks",
+      "input2": "cement_bags",
+      "outputKey": "modern_gulf_house",
+      "description": "Modern materials and construction skill create a Gulf house"
+    },
+    {
+      "input1": "wood_fire",
+      "input2": "hammer",
+      "outputKey": "charcoal",
+      "description": "Wood refined with fire and craft creates charcoal"
+    },
+    {
+      "input1": "metal_locker",
+      "input2": "golden_key",
+      "outputKey": "treasure_box",
+      "description": "A locked metal chest opened with a golden key reveals treasure"
+    },
+    {
+      "input1": "wooden_trunk",
+      "input2": "golden_key",
+      "outputKey": "treasure_box",
+      "description": "An ancient trunk unlocked with knowledge reveals treasure"
+    },
+    {
+      "input1": "hammer",
+      "input2": "hand_saw",
+      "outputKey": "wooden_plow",
+      "description": "Tools combined with craftsmanship create a wooden plow"
+    },
+    {
+      "input1": "ropes",
+      "input2": "wooden_plow",
+      "outputKey": "camel_milk",
+      "description": "Farming tools and animal handling knowledge produce camel milk"
+    },
+    {
+      "input1": "feather_pen",
+      "input2": "inkwell",
+      "outputKey": "writing_scroll",
+      "description": "Ink and pen guided by knowledge create a writing scroll"
+    },
+    {
+      "input1": "writing_scroll",
+      "input2": "book_of_legends",
+      "outputKey": "book_of_legends",
+      "description": "Recorded stories preserve legends forever"
+    },
+    {
+      "input1": "golden_locker",
+      "input2": "golden_key",
+      "outputKey": "rolex_watch",
+      "description": "Luxury locked and unlocked reveals a timeless watch"
+    },
+    {
+      "input1": "charcoal",
+      "input2": "perfume_of_kings",
+      "outputKey": "red_oud_perfume",
+      "description": "Heat and royal perfume craft create red oud"
+    },
+    {
+      "input1": "sandbags",
+      "input2": "ropes",
+      "outputKey": "cement_bags",
+      "description": "Sand and binding knowledge create cement bags"
+    },
+    {
+      "input1": "cement_bags",
+      "input2": "water_bucket",
+      "outputKey": "concrete_bricks",
+      "description": "Cement mixed with water forms strong bricks"
+    },
+    {
+      "input1": "concrete_bricks",
+      "input2": "concrete_mixer",
+      "outputKey": "modern_gulf_house",
+      "description": "Bricks shaped with machinery build a modern house"
+    }
+  ]
+}

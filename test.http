@@ -1,0 +1,303 @@
+@baseUrl = http://localhost:4000
+@username = user_{{$timestamp}}
+@password = Passw0rd!{{$timestamp}}
+@email = test{{$timestamp}}@example.com
+@qty = 1
+
+### Health
+GET {{baseUrl}}/health
+
+### (اختياري) Seed drops for local testing
+POST {{baseUrl}}/api/drops/seed
+
+### Register
+# @name register
+POST {{baseUrl}}/api/users/register
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+### Me
+GET {{baseUrl}}/api/users/me
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+
+### Refresh Token (rotate)
+# @name refresh
+POST {{baseUrl}}/api/users/refresh
+Content-Type: application/json
+
+{
+  "refresh": "{{login.response.body.$.tokens.refresh}}"
+}
+
+### Topup wallet (for testing)
+# @name topup
+POST {{baseUrl}}/api/wallet/topup
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Content-Type: application/json
+
+{
+  "amount": 500
+}
+
+### Active Drops
+# @name activeDrops
+GET {{baseUrl}}/api/drops/active
+
+### Buy (uses first drop/item)
+# @name buy
+POST {{baseUrl}}/api/drops/{{activeDrops.response.body.$.drops[0]._id}}/buy
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Content-Type: application/json
+
+{
+  "itemId": "{{activeDrops.response.body.$.drops[0].items[0]._id}}",
+  "qty": {{qty}}
+}
+
+### Buy (idempotent retry with same key)
+POST {{baseUrl}}/api/drops/{{activeDrops.response.body.$.drops[0]._id}}/buy
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Idempotency-Key: key-{{$timestamp}}
+Content-Type: application/json
+
+{
+  "itemId": "{{activeDrops.response.body.$.drops[0].items[0]._id}}",
+  "qty": 1
+}
+
+### Inventory (my)
+# @name myInventory
+GET {{baseUrl}}/api/inventory/my
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+
+### (اختياري) Use an item from inventory
+POST {{baseUrl}}/api/inventory/use
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Content-Type: application/json
+
+{
+  "itemId": "{{activeDrops.response.body.$.drops[0].items[0]._id}}",
+  "qty": 1
+}
+
+### ===== Barter Flow =====
+
+### Seed barter types and recipes (dev)
+POST {{baseUrl}}/api/barter/seed
+
+### Grant barter items to my inventory (dev)
+POST {{baseUrl}}/api/barter/grant
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "key": "oil", "qty": 2 },
+    { "key": "spices", "qty": 2 },
+    { "key": "gems", "qty": 1 },
+    { "key": "silver", "qty": 1 }
+  ]
+}
+
+### List types
+GET {{baseUrl}}/api/barter/types
+
+### Preview barter result (oil + spices)
+# @name barterPreview
+POST {{baseUrl}}/api/barter/preview
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Content-Type: application/json
+
+{
+  "item1Key": "oil",
+  "item2Key": "spices"
+}
+
+### Confirm barter (consume items, add result)
+# @name barterConfirm
+POST {{baseUrl}}/api/barter/confirm
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Content-Type: application/json
+
+{
+  "item1Key": "oil",
+  "item2Key": "spices"
+}
+
+### Use barter result (convert to points)
+POST {{baseUrl}}/api/barter/use
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Content-Type: application/json
+
+{
+  "key": "{{barterPreview.response.body.$.result.key}}"
+}
+
+### Barter history
+GET {{baseUrl}}/api/barter/history
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+
+### ===== Weekly Leaderboard =====
+
+### Current season meta
+GET {{baseUrl}}/api/leaderboard/season
+
+### Weekly top 20
+GET {{baseUrl}}/api/leaderboard/weekly?limit=20
+
+### My weekly rank
+GET {{baseUrl}}/api/leaderboard/weekly/me
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+
+### (Admin) Finalize season and reset weekly points
+POST {{baseUrl}}/api/leaderboard/weekly/finalize?limit=10
+X-Admin-Key: {{adminSecret}}
+
+### Admin: Upsert prize plan
+POST {{baseUrl}}/api/leaderboard/prize-plan/upsert
+X-Admin-Key: {{adminSecret}}
+Content-Type: application/json
+
+{
+  "key": "weekly_v1",
+  "currency": "EGP",
+  "weeklyCapMinor": 5000000,
+  "active": true,
+  "tiers": [
+    { "minRank": 1,  "maxRank": 1,  "amountMinor": 1000000 },
+    { "minRank": 2,  "maxRank": 3,  "amountMinor": 500000 },
+    { "minRank": 4,  "maxRank": 10, "amountMinor": 200000 },
+    { "minRank": 11, "maxRank": 50, "amountMinor": 50000 }
+  ]
+}
+
+### My rewards
+GET {{baseUrl}}/api/rewards/my
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+
+### Claim single reward (replace :id)
+POST {{baseUrl}}/api/rewards/{{rewardsId}}/claim
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Content-Type: application/json
+
+{
+  "mode": "to_game"  
+}
+
+### Claim all available
+POST {{baseUrl}}/api/rewards/claim-all
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+
+### Currency meta
+GET {{baseUrl}}/api/meta/currency
+
+### Rates current (alias)
+GET {{baseUrl}}/api/rates/current
+
+### Admin: Upsert rate USD<->QD
+POST {{baseUrl}}/api/rates/upsert
+X-Admin-Key: {{adminSecret}}
+Content-Type: application/json
+
+{
+  "gcPerUsd": 20
+}
+
+### ===== Caravan Scheduling =====
+
+### Upload an item image (admin)
+POST {{baseUrl}}/api/media/upload
+X-Admin-Key: {{adminSecret}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="icon.png"
+Content-Type: image/png
+
+< ./assets/icon.png
+--WebAppBoundary--
+
+### Upsert a drop template (admin)
+POST {{baseUrl}}/api/schedule/templates/upsert
+X-Admin-Key: {{adminSecret}}
+Content-Type: application/json
+
+{
+  "key": "daily_shop_v1",
+  "name": "My Daily Caravan",
+  "active": true,
+  "items": [
+    { "title": "Item A", "priceDinar": 120, "givesPoints": 50, "barter": false, "stock": 5, "rarity": "rare", "visualId": "i1", "imageUrl": "/uploads/icon.png", "maxPerUser": 1 },
+    { "title": "Item B", "priceDinar": 60,  "givesPoints": 10, "barter": false, "stock": 12, "rarity": "common", "visualId": "i4", "imageUrl": "/uploads/icon.png" }
+  ]
+}
+
+### Seed default drop template (admin)
+POST {{baseUrl}}/api/schedule/dev/seed-template
+X-Admin-Key: {{adminSecret}}
+
+### Seed a seasonal event (admin)
+POST {{baseUrl}}/api/schedule/dev/seed-seasonal
+X-Admin-Key: {{adminSecret}}
+
+### Generate today's schedule (admin)
+POST {{baseUrl}}/api/schedule/generate?template=daily_shop_v1
+X-Admin-Key: {{adminSecret}}
+
+### View today's schedule
+GET {{baseUrl}}/api/schedule/today
+
+### Next upcoming drop (for countdown)
+GET {{baseUrl}}/api/drops/next
+### Topup USD cash (admin/dev)
+POST {{baseUrl}}/api/wallet/topup-usd
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+X-Admin-Key: {{adminSecret}}
+Content-Type: application/json
+
+{
+  "amountUsdMinor": 5000
+}
+
+### Exchange USD -> QD
+POST {{baseUrl}}/api/wallet/exchange
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Content-Type: application/json
+
+{
+  "direction": "usd_to_qd",
+  "amountUsdMinor": 1000
+}
+
+### Exchange QD -> USD
+POST {{baseUrl}}/api/wallet/exchange
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+Content-Type: application/json
+
+{
+  "direction": "qd_to_usd",
+  "amountQd": 200
+}
+
+### Game wallet history (QD)
+GET {{baseUrl}}/api/wallet/history/game?limit=20
+Authorization: Bearer {{login.response.body.$.tokens.access}}
+
+### Cash wallet history (USD)
+GET {{baseUrl}}/api/wallet/history/cash?limit=20
+Authorization: Bearer {{login.response.body.$.tokens.access}}

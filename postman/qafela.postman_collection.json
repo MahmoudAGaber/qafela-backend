@@ -1,0 +1,1142 @@
+{
+  "info": {
+    "name": "Qafela Backend API",
+    "description": "Complete API collection for Qafela Backend with Clean Architecture. Includes Auth (Signup with avatar, Login), Wallet, Drops, Barter, Leaderboard, Profile, and more.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "qafela-collection-v2",
+    "version": "2.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "adminSecret",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "user_{{$timestamp}}",
+      "type": "string"
+    },
+    {
+      "key": "fullName",
+      "value": "Test User {{$timestamp}}",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "test{{$timestamp}}@example.com",
+      "type": "string"
+    },
+    {
+      "key": "countryCode",
+      "value": "+966",
+      "type": "string"
+    },
+    {
+      "key": "phoneNumber",
+      "value": "501234567",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "Passw0rd!{{$timestamp}}",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "dropId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "itemId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "rewardId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "walletRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "barterItem1Key",
+      "value": "honey_jar",
+      "type": "string"
+    },
+    {
+      "key": "barterItem2Key",
+      "value": "nuts_sack",
+      "type": "string"
+    },
+    {
+      "key": "barterResultKey",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register (Sign Up)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data && json.data.tokens) {",
+                  "    pm.collectionVariables.set('accessToken', json.data.tokens.access);",
+                  "    pm.collectionVariables.set('refreshToken', json.data.tokens.refresh);",
+                  "  }",
+                  "} catch(e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "username",
+                  "value": "{{username}}",
+                  "type": "text"
+                },
+                {
+                  "key": "fullName",
+                  "value": "{{fullName}}",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "{{email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "countryCode",
+                  "value": "{{countryCode}}",
+                  "type": "text"
+                },
+                {
+                  "key": "phoneNumber",
+                  "value": "{{phoneNumber}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                },
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional avatar image (PNG, JPEG, WebP, max 5MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "register"]
+            },
+            "description": "Register a new user with avatar upload. All fields are required except avatar.\n\n**Response Format:**\n```json\n{\n  \"message\": \"User registered successfully\",\n  \"data\": {\n    \"user\": { ... },\n    \"tokens\": { \"access\": \"...\", \"refresh\": \"...\" }\n  },\n  \"status\": \"success\",\n  \"code\": 201\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data && json.data.tokens) {",
+                  "    pm.collectionVariables.set('accessToken', json.data.tokens.access);",
+                  "    pm.collectionVariables.set('refreshToken', json.data.tokens.refresh);",
+                  "  }",
+                  "} catch(e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "login"]
+            },
+            "description": "Login with username or email and password.\n\n**Response Format:**\n```json\n{\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": { ... },\n    \"tokens\": { \"access\": \"...\", \"refresh\": \"...\" }\n  },\n  \"status\": \"success\",\n  \"code\": 200\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me"]
+            },
+            "description": "Get current authenticated user information.\n\n**Response Format:**\n```json\n{\n  \"message\": \"User retrieved successfully\",\n  \"data\": {\n    \"_id\": \"...\",\n    \"username\": \"...\",\n    \"fullName\": \"...\",\n    \"email\": \"...\",\n    \"countryCode\": \"...\",\n    \"phoneNumber\": \"...\",\n    \"avatarUrl\": \"...\",\n    \"points\": 1000,\n    \"wallet\": { ... },\n    \"level\": 1,\n    \"xp\": 0,\n    \"profile\": { ... },\n    \"stats\": { ... }\n  },\n  \"status\": \"success\",\n  \"code\": 200\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.tokens && json.tokens.access) {",
+                  "    pm.collectionVariables.set('accessToken', json.tokens.access);",
+                  "  }",
+                  "} catch(e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "refresh"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Wallet",
+      "item": [
+        {
+          "name": "Topup Dinar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/topup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "topup"]
+            },
+            "description": "Add dinars to wallet balance."
+          },
+          "response": []
+        },
+        {
+          "name": "Exchange USD → Dinar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"usd_to_qd\",\n  \"amountUsdMinor\": 1000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/exchange",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "exchange"]
+            },
+            "description": "Exchange USD (in cents) to Dinars. 1 USD = 3 Dinars."
+          },
+          "response": []
+        },
+        {
+          "name": "Exchange Dinar → USD",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"qd_to_usd\",\n  \"amountQd\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/exchange",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "exchange"]
+            },
+            "description": "Exchange Dinars to USD (in cents)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payment Methods",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/methods?kind=deposit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "methods"],
+              "query": [
+                {
+                  "key": "kind",
+                  "value": "deposit",
+                  "description": "Optional: 'deposit' or 'withdraw'"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Deposit Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data && json.data.id) {",
+                  "    pm.collectionVariables.set('walletRequestId', json.data.id);",
+                  "  }",
+                  "} catch(e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"deposit\",\n  \"methodKey\": \"bank_transfer\",\n  \"amount\": 100,\n  \"note\": \"Deposit request\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "requests"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Withdraw Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data && json.data.id) {",
+                  "    pm.collectionVariables.set('walletRequestId', json.data.id);",
+                  "  }",
+                  "} catch(e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"withdraw\",\n  \"methodKey\": \"bank_transfer\",\n  \"amount\": 50,\n  \"note\": \"Withdraw request\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "requests"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Wallet Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/requests?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "requests"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Wallet Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/requests/{{walletRequestId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "requests", "{{walletRequestId}}", "cancel"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Wallet Timeline",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/timeline?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "timeline"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Wallet History (Game)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/history/game?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "history", "game"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Topup USD (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Admin-Key",
+                "value": "{{adminSecret}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amountUsdMinor\": 5000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/topup-usd",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "topup-usd"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upsert Payment Method (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Admin-Key",
+                "value": "{{adminSecret}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"bank_transfer\",\n  \"label\": \"Bank Transfer\",\n  \"kind\": \"withdraw\",\n  \"feeType\": \"flat\",\n  \"feeValue\": 0,\n  \"currency\": \"QD\",\n  \"minAmount\": 10,\n  \"maxAmount\": 1000,\n  \"processingTime\": \"1-3 business days\",\n  \"instant\": false,\n  \"settings\": {\n    \"holdOnCreate\": true,\n    \"feeFromWallet\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/methods/upsert",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "methods", "upsert"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Request Status (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Admin-Key",
+                "value": "{{adminSecret}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\",\n  \"adminNote\": \"Approved\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/requests/{{walletRequestId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "requests", "{{walletRequestId}}", "status"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Drops & Inventory",
+      "item": [
+        {
+          "name": "Get Active Drops",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/drops/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "drops", "active"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buy Drop Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.itemId) {",
+                  "    pm.collectionVariables.set('itemId', json.itemId);",
+                  "  }",
+                  "} catch(e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": \"{{itemId}}\",\n  \"qty\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/drops/{{dropId}}/buy",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "drops", "{{dropId}}", "buy"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Inventory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "my"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Barter",
+      "item": [
+        {
+          "name": "List Barter Types",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/barter/types",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "barter", "types"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Preview Barter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item1Key\": \"{{barterItem1Key}}\",\n  \"item2Key\": \"{{barterItem2Key}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/barter/preview",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "barter", "preview"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Barter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.result && json.result.key) {",
+                  "    pm.collectionVariables.set('barterResultKey', json.result.key);",
+                  "  }",
+                  "} catch(e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item1Key\": \"{{barterItem1Key}}\",\n  \"item2Key\": \"{{barterItem2Key}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/barter/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "barter", "confirm"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Use Barter Result",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"{{barterResultKey}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/barter/use",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "barter", "use"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Barter History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/barter/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "barter", "history"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Schedule",
+      "item": [
+        {
+          "name": "Get Today Schedule",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule/today",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "schedule", "today"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Next Drop",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/drops/next",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "drops", "next"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Leaderboard",
+      "item": [
+        {
+          "name": "Get Season Leaderboard",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/leaderboard/season",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "leaderboard", "season"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Weekly Leaderboard",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/leaderboard/weekly?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "leaderboard", "weekly"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Weekly Rank",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/leaderboard/weekly/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "leaderboard", "weekly", "me"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rewards",
+      "item": [
+        {
+          "name": "Get My Rewards",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/rewards/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rewards", "my"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Claim Reward",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mode\": \"to_game\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rewards/{{rewardId}}/claim",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rewards", "{{rewardId}}", "claim"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Get Profile Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profile/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profile", "overview"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Badges",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profile/badges",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profile", "badges"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"avatarUrl\": \"https://example.com/avatar.png\",\n  \"bio\": \"Bio text\",\n  \"bannerColor\": \"#E6B989\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profile"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Meta & Rates",
+      "item": [
+        {
+          "name": "Get Currency Meta",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/meta/currency",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "meta", "currency"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Rates",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/rates/current",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rates", "current"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Media",
+      "item": [
+        {
+          "name": "Upload Media (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Key",
+                "value": "{{adminSecret}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/media/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "media", "upload"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ready Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/ready",
+              "host": ["{{baseUrl}}"],
+              "path": ["ready"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
