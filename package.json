@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc -p .",
-    "start": "node dist/index.js",
+    "start": "node dist/src/index.js",
     "seed:caravan": "ts-node-dev --transpile-only scripts/seedCaravanData.ts",
     "seed:season": "ts-node-dev --transpile-only scripts/createTestSeason.ts",
     "translate:items": "ts-node-dev --transpile-only scripts/translateItems.ts"

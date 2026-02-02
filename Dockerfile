@@ -40,5 +40,5 @@ USER node
 
 EXPOSE 4000
 
-CMD ["node", "dist/index.js"]
-
+# tsconfig outputs to dist/src/* due to rootDir "."
+CMD ["node", "dist/src/index.js"]
