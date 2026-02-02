@@ -56,6 +56,8 @@ jobs:
           script: |
             set -e
             cd /opt/qafela/compose
-            docker compose pull backend
-            docker compose up -d backend
+            # Compose uses :latest; ensure local :latest matches the exact commit image we just built.
+            docker pull ${{ env.IMAGE_BACKEND }}:${{ github.sha }}
+            docker tag  ${{ env.IMAGE_BACKEND }}:${{ github.sha }} ${{ env.IMAGE_BACKEND }}:latest
+            docker compose up -d --force-recreate backend
             docker image prune -f
