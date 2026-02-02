@@ -6,7 +6,7 @@ export interface RegisterUserDto {
   countryCode: string;
   phoneNumber: string;
   password: string;
-  avatarUrl?: string; // Will be set after file upload
+  avatarUrl?: string | null; // Will be set after file upload (or null to clear)
 }
 
 export interface LoginUserDto {
@@ -26,7 +26,7 @@ export interface UserResponseDto {
   email: string;
   countryCode: string;
   phoneNumber: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   points: number;
   wallet: {
     dinar: number;
@@ -37,9 +37,9 @@ export interface UserResponseDto {
   xp: number;
   xpToNext: number;
   profile: {
-    avatarUrl?: string;
-    bio?: string;
-    bannerColor?: string;
+    avatarUrl?: string | null;
+    bio?: string | null;
+    bannerColor?: string | null;
   };
   stats: {
     dropsParticipated: number;
@@ -47,7 +47,7 @@ export interface UserResponseDto {
     barterTrades: number;
     rewardsClaimed: number;
     badgesEarned: number;
-    lastLevelUp?: Date;
+    lastLevelUp?: Date | null;
   };
 }
 
@@ -60,6 +60,5 @@ export interface UpdateUserDto {
   username?: string;
   fullName?: string;
   email?: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 }
-

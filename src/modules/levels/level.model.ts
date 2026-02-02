@@ -7,7 +7,7 @@ export interface LevelReward {
   icon?: string; // Icon URL or emoji
 }
 
-export interface ILevel extends Document {
+export interface LevelAttrs {
   level: number;
   title: string; // Arabic title
   titleEn?: string; // English title
@@ -22,6 +22,8 @@ export interface ILevel extends Document {
   unlockFeatures?: string[]; // Features unlocked at this level (e.g., "premium_items", "special_drops")
   isActive: boolean;
 }
+
+export interface ILevel extends Document, LevelAttrs {}
 
 const levelRewardSchema = new Schema<LevelReward>(
   {
@@ -58,6 +60,5 @@ const levelSchema = new Schema<ILevel>(
 );
 
 export const Level = model<ILevel>("Level", levelSchema);
-
 
 

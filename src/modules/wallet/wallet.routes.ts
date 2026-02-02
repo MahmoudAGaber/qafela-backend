@@ -60,7 +60,8 @@ const MethodUpsertSchema = z.object({
       feeFromWallet: z.boolean().optional(),
     })
     .optional(),
-  metadata: z.record(z.any()).optional(),
+  // Zod v4 expects explicit key and value schemas for records
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 const UpdateStatusSchema = z.object({
@@ -77,7 +78,7 @@ function asMoney(value: number) {
   return Math.round(value * 100) / 100;
 }
 
-function calcFee(amount: number, method: IPaymentMethod) {
+function calcFee(amount: number, method: any) {
   if (!method.feeValue) return 0;
   if (method.feeType === "percent") {
     return asMoney((amount * method.feeValue) / 100);
@@ -85,22 +86,22 @@ function calcFee(amount: number, method: IPaymentMethod) {
   return asMoney(method.feeValue);
 }
 
-function feeHitsWallet(method: IPaymentMethod) {
+function feeHitsWallet(method: any) {
   if (method.kind === "deposit") return method.settings?.feeFromWallet === true;
   return method.settings?.feeFromWallet !== false;
 }
 
-function shouldHold(method: IPaymentMethod) {
+function shouldHold(method: any) {
   if (method.kind !== "withdraw") return false;
   return method.settings?.holdOnCreate !== false;
 }
 
-function autoApprove(method: IPaymentMethod) {
+function autoApprove(method: any) {
   if (method.kind !== "deposit") return false;
   return method.settings?.autoApprove === true;
 }
 
-function methodSnapshot(method: IPaymentMethod) {
+function methodSnapshot(method: any) {
   return {
     key: method.key,
     label: method.label,
@@ -458,7 +459,7 @@ router.post("/requests", auth, async (req, res) => {
         ],
         { session }
       );
-      holdTxId = tx._id;
+      holdTxId = tx._id as any;
     }
     let status: IWalletRequest["status"] = "pending";
     let completedAt: Date | undefined;
@@ -655,7 +656,7 @@ router.post("/requests/:id/status", async (req, res) => {
           ],
           { session }
         );
-        request.holdTxId = tx._id;
+        request.holdTxId = tx._id as any;
       }
       request.status = "completed";
       request.completedAt = new Date();

@@ -150,7 +150,7 @@ router.get("/history", auth, async (req, res) => {
     const stats = statsMap.get(dropId);
     const userEntry = userMap.get(dropId);
     const itemMeta = new Map(
-      (drop.items ?? []).map((itm) => [String(itm._id), itm])
+      ((drop.items ?? []) as any[]).map((itm: any) => [String(itm._id), itm])
     );
     const purchases = userEntry
       ? Array.from(userEntry.items.values()).map((p) => {

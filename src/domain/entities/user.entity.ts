@@ -6,9 +6,9 @@ export interface Wallet {
 }
 
 export interface ProfileInfo {
-  avatarUrl?: string;
-  bio?: string;
-  bannerColor?: string;
+  avatarUrl?: string | null;
+  bio?: string | null;
+  bannerColor?: string | null;
 }
 
 export interface UserStats {
@@ -28,7 +28,7 @@ export class UserEntity {
     public email: string,
     public countryCode: string,
     public phoneNumber: string,
-    public avatarUrl?: string,
+    public avatarUrl?: string | null,
     public passwordHash?: string,
     public points: number = 0,
     public weeklyPoints: number = 0,
@@ -114,4 +114,3 @@ export class UserEntity {
     };
   }
 }
-

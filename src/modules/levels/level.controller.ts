@@ -2,10 +2,6 @@ import { Request, Response } from 'express';
 import { getAllLevels, getLevelByNumber } from './level.service';
 import { ResponseBuilder, ResponseCode } from '../../application/common/base-response';
 
-interface AuthenticatedRequest extends Request {
-  user?: { id: string };
-}
-
 class LevelController {
   async getAllLevels(req: Request, res: Response): Promise<Response> {
     try {
@@ -48,6 +44,5 @@ class LevelController {
 }
 
 export const levelController = new LevelController();
-
 
 

@@ -7,9 +7,9 @@ interface Wallet {
 }
 
 export interface ProfileInfo {
-  avatarUrl?: string;
-  bio?: string;
-  bannerColor?: string;
+  avatarUrl?: string | null;
+  bio?: string | null;
+  bannerColor?: string | null;
 }
 
 export interface UserStats {
@@ -27,7 +27,7 @@ export interface IUser extends Document {
   email: string;
   countryCode: string;
   phoneNumber: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   passwordHash?: string;
   points: number;         // lifetime points
   weeklyPoints: number;   // resets every season
@@ -37,6 +37,11 @@ export interface IUser extends Document {
   xpToNext: number;
   profile: ProfileInfo;
   stats: UserStats;
+
+  // Daily login streak
+  lastLoginDate?: Date;
+  loginStreak: number;
+  longestStreak: number;
 }
 
 const walletSchema = new Schema<Wallet>(

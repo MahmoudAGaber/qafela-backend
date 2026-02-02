@@ -1,7 +1,7 @@
-import { Level, ILevel } from "./level.model";
+import { Level, ILevel, LevelAttrs } from "./level.model";
 
 // Predefined 10 levels with XP requirements, badges, and rewards
-const PREDEFINED_LEVELS: Omit<ILevel, "_id" | "createdAt" | "updatedAt" | "isActive">[] = [
+const PREDEFINED_LEVELS: Omit<LevelAttrs, "isActive">[] = [
   {
     level: 1,
     title: "رحالة جديد",
@@ -229,6 +229,5 @@ export function getXPForNextLevel(currentLevel: number): number {
   
   return nextLevel.xpRequired - currentXPRequired;
 }
-
 
 

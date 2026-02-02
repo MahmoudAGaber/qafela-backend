@@ -1,6 +1,14 @@
 import { BarterRecipe, BarterType } from '../barter/barter.model';
 import { Item } from '../item/item.model';
 
+interface ItemDefinition {
+  key: string;
+  title: string;
+  titleEn?: string;
+  rarity: string;
+  icon?: string;
+}
+
 interface Recipe {
   input1: string;
   input2: string;

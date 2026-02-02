@@ -5,26 +5,27 @@ import { Item } from '../item/item.model';
 const ITEMS_FILE = path.join(process.cwd(), 'assets', 'items.json');
 
 interface ItemData {
-  items: Array<{
-    key: string;
-    title: string;
-    titleEn?: string;
-    description?: string;
-    descriptionEn?: string;
-    rarity: string;
-    priceDinar: number;
-    givesPoints: number;
-    givesXp?: number;
-    requiredLevel?: number;
-    type?: string;
-    barter: boolean;
-    stock?: number;
-    maxPerUser?: number | null;
-    icon?: string;
-    imageUrl?: string;
-    visualId?: string;
-  }>;
-}
+	  items: Array<{
+	    key: string;
+	    title: string;
+	    titleEn?: string;
+	    description?: string;
+	    descriptionEn?: string;
+	    rarity: string;
+	    priceDinar: number;
+	    givesPoints: number;
+	    givesXp?: number;
+	    requiredLevel?: number;
+	    type?: string;
+	    barter: boolean;
+	    stock?: number;
+	    maxPerUser?: number | null;
+	    icon?: string;
+	    imageUrl?: string;
+	    visualId?: string;
+	    enabled?: boolean;
+	  }>;
+	}
 
 export async function seedItemsFromJSON(): Promise<{ created: number; skipped: number }> {
   try {
@@ -73,4 +74,3 @@ export async function seedItemsFromJSON(): Promise<{ created: number; skipped: n
     throw error;
   }
 }
-
